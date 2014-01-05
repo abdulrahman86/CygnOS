@@ -1,3 +1,16 @@
+x86 Memory Map:
+0x00000000 - 0x000003FF - Real Mode Interrupt Vector Table
+0x00000400 - 0x000004FF - BIOS Data Area
+0x00000500 - 0x00007BFF - Unused
+0x00007C00 - 0x00007DFF - Our Bootloader
+0x00007E00 - 0x0009FFFF - Unused
+0x000A0000 - 0x000BFFFF - Video RAM (VRAM) Memory
+0x000B0000 - 0x000B7777 - Monochrome Video Memory
+0x000B8000 - 0x000BFFFF - Color Video Memory
+0x000C0000 - 0x000C7FFF - Video ROM BIOS
+0x000C8000 - 0x000EFFFF - BIOS Shadow Area
+0x000F0000 - 0x000FFFFF - System BIOS
+
 Load Second Stage Bootloader
 	Declare BPB
 	Declare variables
@@ -22,15 +35,35 @@ Load Second Stage Bootloader
 	Boot signature
 	End
 	
-x86 Memory Map:
-0x00000000 - 0x000003FF - Real Mode Interrupt Vector Table
-0x00000400 - 0x000004FF - BIOS Data Area
-0x00000500 - 0x00007BFF - Unused
-0x00007C00 - 0x00007DFF - Our Bootloader
-0x00007E00 - 0x0009FFFF - Unused
-0x000A0000 - 0x000BFFFF - Video RAM (VRAM) Memory
-0x000B0000 - 0x000B7777 - Monochrome Video Memory
-0x000B8000 - 0x000BFFFF - Color Video Memory
-0x000C0000 - 0x000C7FFF - Video ROM BIOS
-0x000C8000 - 0x000EFFFF - BIOS Shadow Area
-0x000F0000 - 0x000FFFFF - System BIOS
+Boot process:
+Still unclear as to where BIOS is present and how it it loaded/executed first - http://superuser.com/questions/695769/how-is-the-nvram-eprom-which-contains-the-firmware-placed-and-used.
+For 8086 purposes, following is the process:
+ - CPU initially executes from 0xFFFF0. This has a jmp to the bios code located at 0xF0000.
+ - After performing all its tasks (? to be listed in detail), bios loads bootloader at 0x07C00 and our code starts.
+Interrupts available in real mode (http://stackoverflow.com/questions/20859185/what-interrupts-are-available-in-8086-real-mode):
+"there are 256 interrupts. 0-7 were used for processor-internal stuff. 07-0F were triggered by hardware. 10-1F were reserved for the Bios, and DOS used 20-27. The rest of them were unused, which means, no valid procedure entry point was stored for them in the interrupt table."
+After entering protected mode, it is upto the OS to leave or remove the IVT. Windows keeps it, Linux removes it.
+For partitioned hard disks, 
+
+Bios Parameter Block:
+BPB starts 3 bytes from beginning. There is sufficient code between the first jmp and its target to exceed a 8-bit size avoiding a short jump. We do a near jump. Use a nop otherwise to offset one byte.
+Code here is based on a 3.5" double-sided 1.44 MB floppy:
+Bytes per sector : 512
+Sectors per track : 18
+Tracks per side : 80
+BPB used here is an extended BPB (used since DOS 4.0; format used for formatting the floppy is VFAT which was introduced in Windows 95).
+It includes:
+DOS 3.31 BPB, which includes:
+ DOS 2.0 BPB (which has 8 fields) followed by 4 fields
+6 more fields
+Root directory for FAT12 has 224 entries, sectors per FAT being 9 and reserved sectors 1.
+
+Segment initialization:
+Code segment cannot be modified (? still not sure of how it is set).
+Preferably use the unused real mode space for all tasks, including the stack.
+FS and GS will most likely not be used.
+
+Pending tasks:
+- Loading memory map
+- BIOS shadow area
+- Computer tasks immediately post boot including BIOS tasks before loading bootloader00
