@@ -43,7 +43,7 @@ For 8086 purposes, following is the process:
 Interrupts available in real mode (http://stackoverflow.com/questions/20859185/what-interrupts-are-available-in-8086-real-mode):
 "there are 256 interrupts. 0-7 were used for processor-internal stuff. 07-0F were triggered by hardware. 10-1F were reserved for the Bios, and DOS used 20-27. The rest of them were unused, which means, no valid procedure entry point was stored for them in the interrupt table."
 After entering protected mode, it is upto the OS to leave or remove the IVT. Windows keeps it, Linux removes it.
-For partitioned hard disks, 
+For partitioned hard disks, a master boot record (MBR) is present at the first sector. It has a code and a partition table which marks the active partition. MBR loads the active partition and reads the boot sector off it, transferring control to it. (http://technet.microsoft.com/en-us/library/cc976786.aspx)
 
 Bios Parameter Block:
 BPB starts 3 bytes from beginning. There is sufficient code between the first jmp and its target to exceed a 8-bit size avoiding a short jump. We do a near jump. Use a nop otherwise to offset one byte.
