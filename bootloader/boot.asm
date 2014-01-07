@@ -48,10 +48,22 @@ __SEGMENTS_INIT:
 	jmp __LOAD_ROOT
 	
 __VARIABLES_DECL:
-
+	msgBootStarting DB "Loading MyOS...", 0x0D, 0x0A
+	
 __FUNCTIONS_DECL:
+	_PrintMessage:
+		lodsb
+		or al, al
+		jz Done
+		mov ah, 0Eh
+		int 10h
+		
+	Done:
+		ret
 
 __LOAD_ROOT:
+	mov si, msgBootStarting
+	call _PrintMessage
 
 __LOAD_FAT:
 
