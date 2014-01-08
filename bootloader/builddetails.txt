@@ -1,0 +1,5 @@
+mkfs.vfat (mkdosfs) creates a FAT12 file system.
+-C switch means create the file given as argument. Size has to be specified in number of blocks (512 B).
+	mkfs.vfat -C floppy.img 2880
+dd command is used to write the specified number of bytes directly as I/O.
+	dd if=boot.bin of=floppy.img bs=512
