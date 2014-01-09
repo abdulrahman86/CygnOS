@@ -4,9 +4,9 @@ org 0
 jmp __SEGMENTS_INIT
 
 bpbOEMName		DB "Sunny S "
-###########################################
-##################### BIOS Parameter Block 
-###########################################
+;##########################################
+;#################### BIOS Parameter Block 
+;##########################################
 
 bpbBytesPerSector		DW 512
 bpbSectorsPerCluster	DB 1
@@ -27,9 +27,9 @@ ebpbVolumeID			DD 0xAAABACAD
 ebpbVolume				DB "BOOT FLOPPY"
 ebpbFileSystem			DB "FAT12   "
 
-##########################################
-############# Bootloader code begins here
-##########################################
+;#########################################
+;############ Bootloader code begins here
+;#########################################
 
 __SEGMENTS_INIT:
 	cli
@@ -41,14 +41,14 @@ __SEGMENTS_INIT:
 	mov gs, ax
 	
 	mov ax, 0x9000
-	mov ss. ax
+	mov ss, ax
 	mov sp, 0xFFFF	
 	
 	sti
 	jmp __LOAD_ROOT
 	
 __VARIABLES_DECL:
-	msgBootStarting DB "Loading MyOS...", 0x0D, 0x0A
+	msgBootStarting DB "Loading MyOS...", 0x0D, 0x0A, 0x00
 	
 __FUNCTIONS_DECL:
 	_PrintMessage:
@@ -57,26 +57,29 @@ __FUNCTIONS_DECL:
 		jz Done
 		mov ah, 0Eh
 		int 10h
-		
+		jmp _PrintMessage
 	Done:
 		ret
 
 __LOAD_ROOT:
 	mov si, msgBootStarting
 	call _PrintMessage
+	
+	cli
+	hlt
 
 __LOAD_FAT:
 
 __LOAD_SECOND_STAGE_SECTS:
 
-##########################################
-################ Zero out remaining bytes
-##########################################
+;#########################################
+;############### Zero out remaining bytes
+;#########################################
 
 times 510 - ($-$$) db 0
 
-##########################################
-########################## Boot signature
-##########################################
+;#########################################
+;######################### Boot signature
+;#########################################
 
 dw 0xAA55
