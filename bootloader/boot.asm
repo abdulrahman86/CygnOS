@@ -65,6 +65,8 @@ __LOAD_ROOT:
 	mov si, msgBootStarting
 	call _PrintMessage
 	
+	
+	
 	cli
 	hlt
 

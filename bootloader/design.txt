@@ -66,4 +66,4 @@ FS and GS will most likely not be used.
 Pending tasks:
 - Loading memory map
 - BIOS shadow area
-- Computer tasks immediately post boot including BIOS tasks before loading bootloader00
+- Computer tasks immediately post boot including BIOS tasks before loading bootloader
