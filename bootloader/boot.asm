@@ -72,18 +72,10 @@ __FUNCTIONS_DECL:
 		mov ah, 0x02
 		mov al, 0x01
 		mov dl, BYTE [ebpbDriveNumber]
-		;push ax
-		;mov ah, 0Eh
-		;mov al, cl
-		;int 10h
-		;pop ax
 		int 13h
 		jnc ReadSuccess
 		mov si, msgFailure
 		call _PrintMessage
-		;mov al, ah
-		;mov ah, 0Eh
-		;int 10h
 		jmp __END_AND_FAILURE
 		
 	ReadSuccess:
