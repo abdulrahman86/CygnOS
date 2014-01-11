@@ -67,3 +67,4 @@ Pending tasks:
 - Loading memory map
 - BIOS shadow area
 - Computer tasks immediately post boot including BIOS tasks before loading bootloader
+- Descriptions of some BPB values
