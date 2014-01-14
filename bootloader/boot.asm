@@ -31,22 +31,6 @@ ebpbFileSystem		 :	DB "FAT12   "
 ;############ Bootloader code begins here
 ;#########################################
 
-__SEGMENTS_INIT:
-	cli
-	
-	mov ax, 0x07C0
-	mov ds, ax
-	mov es, ax
-	mov fs, ax
-	mov gs, ax
-	
-	mov ax, 0x9000
-	mov ss, ax
-	mov sp, 0xFFFF	
-	
-	sti
-	jmp __LOAD_ROOT
-	
 __VARIABLES_DECL:
 	msgBootStarting  DB "Loading MyOS...", 0x0D, 0x0A, 0x00
 	msgRootDirLoaded DB "Loaded root directory...", 0x0D, 0x0A, 0x00
@@ -100,6 +84,22 @@ __FUNCTIONS_DECL:
 		mov ch, al
 		ret
 
+__SEGMENTS_INIT:
+	cli
+	
+	mov ax, 0x07C0
+	mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov gs, ax
+	
+	mov ax, 0x9000
+	mov ss, ax
+	mov sp, 0xFFFF	
+	
+	sti
+	jmp __LOAD_ROOT
+	
 __LOAD_ROOT:
 	mov si, msgBootStarting
 	call _PrintMessage
