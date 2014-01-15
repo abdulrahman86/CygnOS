@@ -35,7 +35,7 @@ __VARIABLES_DECL:
 	msgBootStarting  DB "Loading MyOS...", 0x0D, 0x0A, 0x00
 	msgRootDirLoaded DB "Loaded root directory...", 0x0D, 0x0A, 0x00
 	msgFailure 		 DB "Error in loading the operating system...", 0x0D, 0x0A, 0x00
-	secondStageName  DB "INITKRNLASM"
+	secondStageName  DB "initkrnlasm"
 	firstCluster  :	 DW 0x0000
 	bufStart		 DW 0x0200
 	
@@ -73,8 +73,6 @@ __FUNCTIONS_DECL:
 		inc ax
 		add bx, WORD [bpbBytesPerSector]
 		loop _GetSectors
-		;;;;;mov si, msgRootDirLoaded
-		;;;;;call _PrintMessage
 		ret
 	
 	_LBAtoCHS:
@@ -149,7 +147,12 @@ __LOAD_ROOT:
    	mov WORD [firstCluster], cx
 	
 __LOAD_FAT:
-
+	mov cx, WORD [bpbSectorsPerFAT]
+	mov ax, WORD [bpbReservedSectors]
+	
+	mov bx, bufStart
+	call _GetSectors
+	
 __LOAD_SECOND_STAGE_SECTS:
 
 __END_AND_FAILURE:

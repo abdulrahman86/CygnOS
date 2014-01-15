@@ -57,6 +57,7 @@ DOS 3.31 BPB, which includes:
  DOS 2.0 BPB (which has 8 fields) followed by 4 fields
 6 more fields
 Root directory for FAT12 has 224 entries, sectors per FAT being 9 and reserved sectors 1.
+Media descriptor for our floppy is F0. More details here : http://www.win.tue.nl/~aeb/linux/fs/fat/fat-1.html
 
 Segment initialization:
 Code segment cannot be modified (? still not sure of how it is set).
@@ -68,3 +69,6 @@ Pending tasks:
 - BIOS shadow area
 - Computer tasks immediately post boot including BIOS tasks before loading bootloader
 - Descriptions of some BPB values
+- Variable vs label
+- Two entries in nautilus for losetup/mount
+- Why is the second FAT also being read
