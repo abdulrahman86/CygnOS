@@ -34,7 +34,10 @@ ebpbFileSystem		 :	DB "FAT12   "
 __VARIABLES_DECL:
 	msgBootStarting  DB "Loading MyOS...", 0x0D, 0x0A, 0x00
 	msgRootDirLoaded DB "Loaded root directory...", 0x0D, 0x0A, 0x00
-	msgFailure DB "Error in loading the operating system...", 0x0D, 0x0A, 0x00
+	msgFailure 		 DB "Error in loading the operating system...", 0x0D, 0x0A, 0x00
+	secondStageName  DB "INITKRNLASM"
+	firstCluster  :	 DW 0x0000
+	bufStart		 DW 0x0200
 	
 __FUNCTIONS_DECL:
 	_PrintMessage:
@@ -58,6 +61,7 @@ __FUNCTIONS_DECL:
 		mov dl, BYTE [ebpbDriveNumber]
 		int 13h
 		jnc ReadSuccess
+		
 		mov si, msgFailure
 		call _PrintMessage
 		jmp __END_AND_FAILURE
@@ -117,9 +121,33 @@ __LOAD_ROOT:
 	mul WORD [bpbSectorsPerFAT]
 	add ax, WORD [bpbReservedSectors]	;ax now has number of sectors before root directory by 0-based addressing
 	
-	mov bx, 0x0200
+	mov bx, bufStart
 	call _GetSectors
-
+	
+	mov cx, WORD [bpbNumberOfRootEnt]
+	mov di, bufStart
+	
+   _ROOT_FIND_II_STAGE:
+   	mov si, secondStageName
+   	push cx
+   	push di
+   	mov cx, 0x000B
+   	repe cmpsb
+   	cmp cx, 0x0000
+   	pop di
+   	jz _FIND_FIRST_CLUSTER_II_STAGE
+   	pop cx
+   	add di, 0x0020
+   	loop _ROOT_FIND_II_STAGE
+   	
+	mov si, msgFailure
+	call _PrintMessage
+	jmp __END_AND_FAILURE
+	
+   _FIND_FIRST_CLUSTER_II_STAGE:
+   	mov cx, WORD [di + 0x001A]
+   	mov WORD [firstCluster], cx
+	
 __LOAD_FAT:
 
 __LOAD_SECOND_STAGE_SECTS:
