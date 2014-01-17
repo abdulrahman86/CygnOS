@@ -64,6 +64,11 @@ Code segment cannot be modified (? still not sure of how it is set).
 Preferably use the unused real mode space for all tasks, including the stack.
 FS and GS will most likely not be used.
 
+Boot sector/FAT/Root Directory:
+Boot sector is a reserved sector.
+Cluster numbers 0 and 1 are reserved. They are not physically present, and first actual cluster is 2. However, FAT entried 0 and 1 are there.
+The portion after root directory is called the data region.
+
 Pending tasks:
 - Loading memory map
 - BIOS shadow area
@@ -72,3 +77,4 @@ Pending tasks:
 - Variable vs label
 - Two entries in nautilus for losetup/mount
 - Why is the second FAT also being read
+- INITKRNL.BIN vs initkrnl.bin

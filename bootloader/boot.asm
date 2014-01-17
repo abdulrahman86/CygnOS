@@ -33,11 +33,12 @@ ebpbFileSystem		 :	DB "FAT12   "
 
 __VARIABLES_DECL:
 	msgBootStarting  DB "Loading MyOS...", 0x0D, 0x0A, 0x00
-	msgRootDirLoaded DB "Loaded root directory...", 0x0D, 0x0A, 0x00
 	msgFailure 		 DB "Error in loading the operating system...", 0x0D, 0x0A, 0x00
-	secondStageName  DB "initkrnlasm"
-	firstCluster  :	 DW 0x0000
-	bufStart		 DW 0x0200
+	msgBootComplete	 DB "Boot finished. Loading kernel loader...", 0x0D, 0x0A, 0x00
+	secondStageName  DB "INITKRNLBIN"
+	nextCluster  	 DW 0
+	bufStart	  	 DW 0x0200
+	dataRegion	  	 DW 0
 	
 __FUNCTIONS_DECL:
 	_PrintMessage:
@@ -62,8 +63,6 @@ __FUNCTIONS_DECL:
 		int 13h
 		jnc ReadSuccess
 		
-		mov si, msgFailure
-		call _PrintMessage
 		jmp __END_AND_FAILURE
 		
 	ReadSuccess:
@@ -85,6 +84,14 @@ __FUNCTIONS_DECL:
 		mov dh, dl
 		mov ch, al
 		ret
+		
+	_ClusterToLBA:
+		sub ax, 0x0002
+		xor cx, cx
+		mov cl, BYTE [bpbSectorsPerCluster]
+		mul cl
+		add ax, WORD [dataRegion]
+		ret
 
 __SEGMENTS_INIT:
 	cli
@@ -100,7 +107,6 @@ __SEGMENTS_INIT:
 	mov sp, 0xFFFF	
 	
 	sti
-	jmp __LOAD_ROOT
 	
 __LOAD_ROOT:
 	mov si, msgBootStarting
@@ -119,11 +125,14 @@ __LOAD_ROOT:
 	mul WORD [bpbSectorsPerFAT]
 	add ax, WORD [bpbReservedSectors]	;ax now has number of sectors before root directory by 0-based addressing
 	
-	mov bx, bufStart
+	mov WORD [dataRegion], ax
+	add WORD [dataRegion], cx
+	
+	mov bx, WORD [bufStart]
 	call _GetSectors
 	
 	mov cx, WORD [bpbNumberOfRootEnt]
-	mov di, bufStart
+	mov di, WORD [bufStart]
 	
    _ROOT_FIND_II_STAGE:
    	mov si, secondStageName
@@ -132,32 +141,76 @@ __LOAD_ROOT:
    	mov cx, 0x000B
    	repe cmpsb
    	cmp cx, 0x0000
-   	pop di
-   	jz _FIND_FIRST_CLUSTER_II_STAGE
-   	pop cx
+   	pop di   	
+   	jz _FIND_FIRST_CLUSTER_II_STAGE   	
    	add di, 0x0020
+   	pop cx   	
    	loop _ROOT_FIND_II_STAGE
    	
-	mov si, msgFailure
-	call _PrintMessage
 	jmp __END_AND_FAILURE
 	
    _FIND_FIRST_CLUSTER_II_STAGE:
    	mov cx, WORD [di + 0x001A]
-   	mov WORD [firstCluster], cx
-	
+   	mov WORD [nextCluster], cx
+   	
 __LOAD_FAT:
 	mov cx, WORD [bpbSectorsPerFAT]
 	mov ax, WORD [bpbReservedSectors]
 	
-	mov bx, bufStart
+	mov bx, WORD [bufStart]
 	call _GetSectors
 	
+	mov ax, 0x0050
+	mov es, ax
+	mov bx, 0x0000
+	push bx
+	
+	mov ax, WORD [nextCluster]
 __LOAD_SECOND_STAGE_SECTS:
+	call _ClusterToLBA
+	
+	xor cx, cx
+	mov cl, BYTE [bpbSectorsPerCluster]
+	pop bx
+	call _GetSectors
+	push bx
 
+   _READ_ALL_SECTS:
+   	mov ax, WORD [nextCluster]
+	mov cx, ax
+	mov dx, ax
+	shr cx, 0x0001
+	add dx, cx
+	mov bx, 0x0200
+	add bx, dx
+	mov dx, WORD [bx]
+	test ax, 0x0001
+	jz _EVEN_CLUSTER
+	
+	shr dx, 0x0004
+	jmp _CHECK_LAST_CLUSTER
+	
+   _EVEN_CLUSTER:
+    and dx, 0x0FFF
+    
+   _CHECK_LAST_CLUSTER:
+    cmp dx, 0x0FF0
+    mov WORD [nextCluster], dx
+    jnz __LOAD_SECOND_STAGE_SECTS
+    
+    mov si, msgBootComplete
+    call _PrintMessage
+    
+    push WORD 0x0050
+    push WORD 0x0000
+    retf
+	
 __END_AND_FAILURE:
-	cli
-	hlt
+	mov si, msgFailure
+	call _PrintMessage
+	mov ah, 0x0
+	int 16h
+	int 19h
 
 ;#########################################
 ;############### Zero out remaining bytes

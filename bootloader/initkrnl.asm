@@ -1,10 +1,10 @@
 bits 16
-org 0x0
 
-mov ax,0050
+mov ax, 0x0050
 mov ds, ax
 mov es, ax
-
+mov fs, ax
+mov gs, ax
 jmp _END
 
 secondStageLoaded DB "Second stage loaded", 0x0D, 0x0A, 0x00
