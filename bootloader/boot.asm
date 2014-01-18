@@ -69,8 +69,8 @@ __FUNCTIONS_DECL:
 		pop cx
 		pop bx
 		pop ax
-		inc ax
-		add bx, WORD [bpbBytesPerSector]
+		inc ax								;Point to next sector to read from 
+		add bx, WORD [bpbBytesPerSector]	;advance write pointer to next block
 		loop _GetSectors
 		ret
 	
@@ -119,7 +119,7 @@ __LOAD_ROOT:
 	mov ax, 0x0020
 	mul WORD [bpbNumberOfRootEnt]
 	div WORD [bpbBytesPerSector]
-	xchg ax, cx                     ;cx now has number of sectors used by root directory
+	xchg ax, cx                     	;cx now has number of sectors used by root directory
 	
 	mov al, BYTE [bpbNumberOfFATs]
 	mul WORD [bpbSectorsPerFAT]
@@ -160,9 +160,9 @@ __LOAD_FAT:
 	mov bx, WORD [bufStart]
 	call _GetSectors
 	
-	mov ax, 0x0050
+	mov ax, 0x0050						;Location where second stage will be loaded
 	mov es, ax
-	mov bx, 0x0000
+	mov bx, 0x0000						;Location where second stage will be loaded
 	push bx
 	
 	mov ax, WORD [nextCluster]
@@ -172,19 +172,19 @@ __LOAD_SECOND_STAGE_SECTS:
 	xor cx, cx
 	mov cl, BYTE [bpbSectorsPerCluster]
 	pop bx
-	call _GetSectors
+	call _GetSectors					;Get file cluster
 	push bx
 
    _READ_ALL_SECTS:
    	mov ax, WORD [nextCluster]
 	mov cx, ax
 	mov dx, ax
-	shr cx, 0x0001
-	add dx, cx
+	shr cx, 0x0001						;Divide cluster number by two
+	add dx, cx							;Cluster number*1.5 = index into FAT
 	mov bx, 0x0200
 	add bx, dx
 	mov dx, WORD [bx]
-	test ax, 0x0001
+	test ax, 0x0001						;Similar to AND but does not change register values
 	jz _EVEN_CLUSTER
 	
 	shr dx, 0x0004
@@ -195,22 +195,22 @@ __LOAD_SECOND_STAGE_SECTS:
     
    _CHECK_LAST_CLUSTER:
     cmp dx, 0x0FF0
-    mov WORD [nextCluster], dx
+    mov WORD [nextCluster], dx			;dx has next cluster number
     jnz __LOAD_SECOND_STAGE_SECTS
     
     mov si, msgBootComplete
     call _PrintMessage
     
-    push WORD 0x0050
-    push WORD 0x0000
+    push WORD 0x0050					;CS for second stage
+    push WORD 0x0000					;IP for second stage
     retf
 	
 __END_AND_FAILURE:
 	mov si, msgFailure
 	call _PrintMessage
 	mov ah, 0x0
-	int 16h
-	int 19h
+	int 16h								;Wait for keypress (ah=0)
+	int 19h								;Reboot
 
 ;#########################################
 ;############### Zero out remaining bytes
