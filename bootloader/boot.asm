@@ -32,7 +32,7 @@ ebpbFileSystem		 :	DB "FAT12   "
 ;#########################################
 
 __VARIABLES_DECL:
-	msgBootStarting  DB "Loading MyOS...", 0x0D, 0x0A, 0x00
+	msgBootStarting  DB 0x0D, 0x0A, "Loading MyOS...", 0x0D, 0x0A, 0x00
 	msgFailure 		 DB "Error in loading the operating system...", 0x0D, 0x0A, 0x00
 	msgBootComplete	 DB "Boot finished. Loading kernel loader...", 0x0D, 0x0A, 0x00
 	secondStageName  DB "INITKRNLBIN"

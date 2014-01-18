@@ -7,7 +7,7 @@ mov fs, ax
 mov gs, ax
 jmp _END
 
-secondStageLoaded DB "Second stage loaded", 0x0D, 0x0A, 0x00
+secondStageLoaded DB "Kernel loader loaded", 0x0D, 0x0A, 0x00
 
 _PrintMessage:
 		lodsb
