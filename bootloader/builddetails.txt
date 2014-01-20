@@ -1,5 +1,10 @@
 mkfs.vfat (mkdosfs) creates a FAT12 file system.
--C switch means create the file given as argument. Size has to be specified in number of blocks (512 B).
-	mkfs.vfat -C floppy.img 2880
+-C switch means create the file given as argument. Size has to be specified in number of bytes.
+	mkfs.vfat -C floppy.img 1440
 dd command is used to write the specified number of bytes directly as I/O.
-	dd if=boot.bin of=floppy.img bs=512
+	dd if=boot.bin of=floppy.img bs=512 conv=notrunc
+	notrunc doesn't truncate the floppy image to inout size.
+losetup /dev/loop0 floppy.img
+	losetup links a loop device with our image, allowing to write to it as if it were a device.
+mount -t vfat -o loop /dev/loop0 /media/floppy
+Copy image, unmount and unlink from loop device using -d switch with losetup.

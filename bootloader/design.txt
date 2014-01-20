@@ -55,6 +55,7 @@ BPB used here is an extended BPB (used since DOS 4.0; format used for formatting
 It includes:
 DOS 3.31 BPB, which includes:
  DOS 2.0 BPB (which has 8 fields) followed by 4 fields
+
 6 more fields
 Root directory for FAT12 has 224 entries, sectors per FAT being 9 and reserved sectors 1.
 Media descriptor for our floppy is F0. More details here : http://www.win.tue.nl/~aeb/linux/fs/fat/fat-1.html
@@ -68,6 +69,27 @@ Boot sector/FAT/Root Directory:
 Boot sector is a reserved sector.
 Cluster numbers 0 and 1 are reserved. They are not physically present, and first actual cluster is 2. However, FAT entried 0 and 1 are there.
 The portion after root directory is called the data region.
+
+Remaining bootloader code:
+int13 sets carry on success. It is recommended to give atleast 3 tried for a sector read - not done that for now.
+LBAtoCHS example:
+ LBA sector number : 20 (head is currently at actual sector 2)
+ Divide by sectors per track(18): quotient - 1, remainder - 2
+ Actual sector number: remainder + 1 = 3
+ Divide quotient by heads per track(2): quotient(cylinder) - 0,
+										remainder(head) - 1
+ Essentially, start the calculations by giving in the total number of sectors before the one we need (which would give the 0-based sector number of the required sector).
+repe - repeat until equal, comparing from si and di. Sets ZF when both are equal.
+FAT12:
+	FAT12 stores 2 FAT entries in 3 bytes as:
+		vw Zu XY
+	Entries 0 and 1 ARE stored.
+	To index into FAT for a particular cluster number, add 1.5*cluster number to FAT's base storage address in memory.
+	FF0 as entry means end of file.
+	Refer to wikipedia and link mentioned above for further details.
+retf - pops into CS:IP.
+int16 (with ah=0) waits for keypress.
+int19 - reboot.
 
 Pending tasks:
 - Loading memory map
