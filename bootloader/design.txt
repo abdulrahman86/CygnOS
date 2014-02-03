@@ -93,10 +93,12 @@ int19 - reboot.
 
 Pending tasks:
 - Loading memory map
-- BIOS shadow area
++ BIOS shadow area
 - Computer tasks immediately post boot including BIOS tasks before loading bootloader
-- Descriptions of some BPB values
++ Descriptions of some BPB values			http://en.wikipedia.org/wiki/File_Allocation_Table#BIOS_Parameter_Block
 - Variable vs label
-- Two entries in nautilus for losetup/mount
-- Why is the second FAT also being read
-- INITKRNL.BIN vs initkrnl.bin
++ Two entries in nautilus for losetup/mount
++ Why is the second FAT also being read
++ INITKRNL.BIN vs initkrnl.bin				http://forum.osdev.org/viewtopic.php?f=1&t=27676
++ First instruction in protected mode		http://stackoverflow.com/questions/21384764/os-development-executing-first-instruction-in-protected-mode
+- Uses of ORG								http://forum.osdev.org/viewtopic.php?f=1&t=27678
