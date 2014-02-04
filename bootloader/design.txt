@@ -101,4 +101,5 @@ Pending tasks:
 + Why is the second FAT also being read
 + INITKRNL.BIN vs initkrnl.bin				http://forum.osdev.org/viewtopic.php?f=1&t=27676
 + First instruction in protected mode		http://stackoverflow.com/questions/21384764/os-development-executing-first-instruction-in-protected-mode
-- Uses of ORG								http://forum.osdev.org/viewtopic.php?f=1&t=27678
++ Uses of ORG								http://forum.osdev.org/viewtopic.php?f=1&t=27678
+- Using eax under BITS 16/default target processor
