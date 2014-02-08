@@ -94,7 +94,7 @@ int19 - reboot.
 Pending tasks:
 - Loading memory map
 + BIOS shadow area									http://superuser.com/questions/241438/how-bios-shadowing-works
-- Computer tasks immediately post boot including BIOS tasks before loading bootloader
++ Computer tasks immediately post boot including BIOS tasks before loading bootloader
 													http://electronics.stackexchange.com/questions/99091/computer-boot-up-operations-up-to-loading-of-bootloader
 + Descriptions of some BPB values					http://en.wikipedia.org/wiki/File_Allocation_Table#BIOS_Parameter_Block
 - Variable vs label
