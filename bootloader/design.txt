@@ -93,13 +93,14 @@ int19 - reboot.
 
 Pending tasks:
 - Loading memory map
-+ BIOS shadow area
++ BIOS shadow area									http://superuser.com/questions/241438/how-bios-shadowing-works
 - Computer tasks immediately post boot including BIOS tasks before loading bootloader
-+ Descriptions of some BPB values			http://en.wikipedia.org/wiki/File_Allocation_Table#BIOS_Parameter_Block
+													http://electronics.stackexchange.com/questions/99091/computer-boot-up-operations-up-to-loading-of-bootloader
++ Descriptions of some BPB values					http://en.wikipedia.org/wiki/File_Allocation_Table#BIOS_Parameter_Block
 - Variable vs label
 + Two entries in nautilus for losetup/mount
 + Why is the second FAT also being read
-+ INITKRNL.BIN vs initkrnl.bin				http://forum.osdev.org/viewtopic.php?f=1&t=27676
-+ First instruction in protected mode		http://stackoverflow.com/questions/21384764/os-development-executing-first-instruction-in-protected-mode
-+ Uses of ORG								http://forum.osdev.org/viewtopic.php?f=1&t=27678
-- Using eax under BITS 16/default target processor
++ INITKRNL.BIN vs initkrnl.bin						http://forum.osdev.org/viewtopic.php?f=1&t=27676
++ First instruction in protected mode				http://stackoverflow.com/questions/21384764/os-development-executing-first-instruction-in-protected-mode
++ Uses of ORG										http://forum.osdev.org/viewtopic.php?f=1&t=27678
++ Using eax under BITS 16/default target processor	http://stackoverflow.com/questions/21580667/does-nasm-have-a-default-target-processor
