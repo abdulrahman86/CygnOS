@@ -6,16 +6,18 @@ msgSecondStageLoading db "Loading kernel loader...", 0x0D, 0x0A, 0x00
 msgTemp db "Kernel loader loaded.", 0x0D, 0x0A, 0x00
 
 ;#########################
-;############### Functions
+;##### Real Mode Functions
 ;#########################
+bits 16
+
 _PrintMsg:
 	lodsb
 	or al, al
-	jz Done
+	jz __Done
 	mov ah, 0Eh
 	int 10h
 	jmp _PrintMsg
- Done:
+ __Done:
 	ret	
 	
 _LOAD_GDT:	
@@ -43,17 +45,20 @@ _ENABLE_A20:
 	mov al, 0xAD
 	out 0x64, al
 
+	call _WAIT_KB_IB
 	mov al, 0xD0
 	out 0x64, al
 	
 	call _WAIT_KB_OB
 	in al, 0x60
 	push ax
-
+	
+	call _WAIT_KB_IB
 	mov al, 0xD1
 	out 0x64, al
 	
 	pop ax
+	call _WAIT_KB_IB
 	or al, 0x02
 	out 0x60, al
 	
@@ -62,8 +67,8 @@ _ENABLE_A20:
 	out 0x64, al	
 	
 	sti
-	ret
-
+	ret	
+	
 ;#########################
 ;# Global Descriptor Table
 ;#########################
@@ -94,8 +99,59 @@ __GDT_POINTER:
 	dd __GDT_START
 
 ;#########################
+; Protected Mode Functions
+;#########################
+bits 32
+
+ROWS 		db 25
+COLUMNS 	db 80
+X 			db 0
+Y 			db 0
+VIDSTART	db 0xB8000
+CHARATTRIB	db 63
+
+PrintChar:
+	cmp dl, 0x0A
+	je __NEW_ROW
+	
+	mov esi, VIDSTART
+	
+	xor ecx, ecx
+	mov eax, ecx
+	mov al, COLUMNS
+	mov cl, 0x02
+	mul cl
+	mov cl, Y
+	mul cl
+	push eax
+	
+	mov cl, 0x02
+	xor eax, eax
+	mov al, X
+	mul cl
+	push ecx
+	add eax, ecx
+	add esi, eax
+	
+	mov dh, CHARATTRIB
+	mov WORD [esi], dx
+	
+	inc X
+	cmp X, COLUMNS
+	je __NEW_ROW
+	jmp __DONE
+ 
+  __NEW_ROW:
+	mov X, 0
+	inc Y
+	
+  __DONE:
+	ret
+
+;#########################
 ;######### Main Code Start
 ;#########################
+bits 16
 
 __INITKRNL_START:
 	cli	
