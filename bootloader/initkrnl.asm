@@ -129,7 +129,7 @@ PrintChar:
 	xor eax, eax
 	mov al, X
 	mul cl
-	push ecx
+	pop ecx
 	add eax, ecx
 	add esi, eax
 	
@@ -147,7 +147,22 @@ PrintChar:
 	
   __DONE:
 	ret
-
+	
+PrintString:
+	push edi
+	
+  __STRING_LOOP:	
+	mov dl, BYTE [edi]
+	cmp dl, 0x0
+	je __DONE
+	call PrintChar
+	
+	inc esi
+	jmp __STRING_LOOP
+	
+  __DONE:
+	ret
+	
 ;#########################
 ;######### Main Code Start
 ;#########################
