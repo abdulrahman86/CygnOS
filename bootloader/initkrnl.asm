@@ -1,29 +1,22 @@
-bits 16
-
 jmp __INITKRNL_START
 
-msgSecondStageLoading db "Loading kernel loader...", 0x0D, 0x0A, 0x00
-msgTemp db "Kernel loader loaded.", 0x0D, 0x0A, 0x00
+msgSecondStageLoading db "**************************", 0x0D, 0x0A, "Loading kernel loader...", 0x0D, 0x0A, 0x00
+msgEnteringProtectedMode db "Entering protected mode...", 0x0D, 0x0A, "**************************", 0x0D, 0x0A, 0x00
+msgInProtectedMode db "--------------------------", 0x0A, "Entered protected mode.", 0x0A, 0x00
+msgSecondStageLoaded db "Kernel loader loaded.", 0x0A, "--------------------------", 0x0A, 0x00
 
 ;#########################
 ;##### Real Mode Functions
 ;#########################
-bits 16
 
 _PrintMsg:
 	lodsb
 	or al, al
-	jz __Done
+	jz __PrintMsgDone
 	mov ah, 0Eh
 	int 10h
 	jmp _PrintMsg
- __Done:
-	ret	
-	
-_LOAD_GDT:	
-	cli
-	lgdt [__GDT_POINTER]
-	sti
+ __PrintMsgDone:
 	ret	
 
 _WAIT_KB_IB:
@@ -57,8 +50,8 @@ _ENABLE_A20:
 	mov al, 0xD1
 	out 0x64, al
 	
-	pop ax
 	call _WAIT_KB_IB
+	pop ax
 	or al, 0x02
 	out 0x60, al
 	
@@ -66,6 +59,12 @@ _ENABLE_A20:
 	mov al, 0xAE
 	out 0x64, al	
 	
+	sti
+	ret	
+	
+_LOAD_GDT:	
+	cli
+	lgdt [__GDT_POINTER]
 	sti
 	ret	
 	
@@ -101,72 +100,72 @@ __GDT_POINTER:
 ;#########################
 ; Protected Mode Functions
 ;#########################
-bits 32
 
 ROWS 		db 25
 COLUMNS 	db 80
 X 			db 0
-Y 			db 0
-VIDSTART	db 0xB8000
-CHARATTRIB	db 63
+Y			db 10
+VIDSTART:	dd 0xB8000
+CHARATTRIB	db 0x0F
 
 PrintChar:
 	cmp dl, 0x0A
 	je __NEW_ROW
-	
-	mov esi, VIDSTART
-	
+
+	mov esi, [VIDSTART]
+
 	xor ecx, ecx
 	mov eax, ecx
-	mov al, COLUMNS
+	mov al, BYTE [COLUMNS]
 	mov cl, 0x02
 	mul cl
-	mov cl, Y
+	mov cl, BYTE [Y]
 	mul cl
 	push eax
-	
+
 	mov cl, 0x02
 	xor eax, eax
-	mov al, X
+	mov al, BYTE [X]
 	mul cl
 	pop ecx
 	add eax, ecx
 	add esi, eax
 	
-	mov dh, CHARATTRIB
+	mov dh, BYTE [CHARATTRIB]
 	mov WORD [esi], dx
 	
-	inc X
-	cmp X, COLUMNS
+	inc BYTE [X]
+	mov bl, BYTE [COLUMNS]
+	cmp BYTE [X], bl
 	je __NEW_ROW
-	jmp __DONE
+	jmp __PrintCharDONE
+;	jnz __PrintCharDONE
  
   __NEW_ROW:
-	mov X, 0
-	inc Y
+	mov BYTE [X], 0
+	inc BYTE [Y]
 	
-  __DONE:
+  __PrintCharDONE:
 	ret
 	
 PrintString:
-	push edi
+	;push edi
 	
   __STRING_LOOP:	
 	mov dl, BYTE [edi]
 	cmp dl, 0x0
-	je __DONE
+	je __PrintStringDONE
 	call PrintChar
 	
-	inc esi
+	inc edi
 	jmp __STRING_LOOP
 	
-  __DONE:
+  __PrintStringDONE:
 	ret
 	
 ;#########################
 ;######### Main Code Start
 ;#########################
-bits 16
 
 __INITKRNL_START:
 	cli	
@@ -190,12 +189,18 @@ __INITKRNL_START:
 	
 	call _ENABLE_A20
 	
-	mov si, msgTemp
+	mov si, msgEnteringProtectedMode
 	call _PrintMsg
 	
 	mov eax, cr0
 	or eax, 0x1
 	mov cr0, eax
+	
+	mov edi, msgInProtectedMode
+	call PrintString
+	
+	mov edi, msgSecondStageLoaded
+	call PrintString
 	
 	cli	
 	hlt
