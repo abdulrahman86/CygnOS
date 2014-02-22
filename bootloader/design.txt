@@ -91,7 +91,11 @@ retf - pops into CS:IP.
 int16 (with ah=0) waits for keypress.
 int19 - reboot.
 
-Pending tasks:
+PMode:
+GDTR is 48 bits long and has the GDT size and base. 13 bits of CS hold offset into GDT (should point to a code descriptor).
+After entering pmode, CS still has old values which will be changed only after it is reloaded.
+
+Questions:
 - Loading memory map
 + BIOS shadow area											http://superuser.com/questions/241438/how-bios-shadowing-works
 + Descriptions of some BPB values							http://en.wikipedia.org/wiki/File_Allocation_Table#BIOS_Parameter_Block
@@ -107,3 +111,12 @@ Pending tasks:
 + Uses of ORG												http://forum.osdev.org/viewtopic.php?f=1&t=27678
 + Using eax under BITS 16/default target processor			http://stackoverflow.com/questions/21580667/does-nasm-have-a-default-target-processor
 + Several wait calls on PS/2 controller when enabling A20	http://stackoverflow.com/questions/21825241/are-so-many-keyboard-controller-wait-calls-needed-when-enabling-the-a20-gate
+- Multiple BITS directives in one file						http://forum.osdev.org/viewtopic.php?f=1&t=27761
+- Graphics mode used by BIOS								http://stackoverflow.com/questions/21954034/graphics-mode-used-by-bios
+
+Useful links:
+* http://stackoverflow.com/questions/5794991/why-cant-i-call-bios-interrupts-from-protected-mode
+* http://www.cs.cmu.edu/~410/doc/segments/segments.html
+* http://thestarman.pcministry.com/asm/mbr/AA55H.html
+* http://stackoverflow.com/questions/1051939/what-information-does-bios-load-into-ram
+* http://stackoverflow.com/questions/5300527/do-normal-x86-or-amd-pcs-run-startup-bios-code-directly-from-rom-or-do-they-cop/5347759#5347759
