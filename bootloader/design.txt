@@ -111,7 +111,7 @@ Questions:
 + Uses of ORG												http://forum.osdev.org/viewtopic.php?f=1&t=27678
 + Using eax under BITS 16/default target processor			http://stackoverflow.com/questions/21580667/does-nasm-have-a-default-target-processor
 + Several wait calls on PS/2 controller when enabling A20	http://stackoverflow.com/questions/21825241/are-so-many-keyboard-controller-wait-calls-needed-when-enabling-the-a20-gate
-- Multiple BITS directives in one file						http://forum.osdev.org/viewtopic.php?f=1&t=27761
++ Multiple BITS directives in one file						http://forum.osdev.org/viewtopic.php?f=1&t=27761
 - Graphics mode used by BIOS								http://stackoverflow.com/questions/21954034/graphics-mode-used-by-bios
 
 Useful links:
