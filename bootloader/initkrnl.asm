@@ -1,10 +1,12 @@
+BITS 16
+
+org 0x500
+
 jmp __INITKRNL_START
 
 msgSecondStageLoading db "**************************", 0x0D, 0x0A, "Loading kernel loader...", 0x0D, 0x0A, 0x00
 msgEnteringProtectedMode db "Entering protected mode...", 0x0D, 0x0A, "**************************", 0x0D, 0x0A, 0x00
-msgInProtectedMode db "--------------------------", 0x0A, "Entered protected mode.", 0x0A, 0x00
-msgSecondStageLoaded db "Kernel loader loaded.", 0x0A, "--------------------------", 0x0A, 0x00
-
+	
 ;#########################
 ;##### Real Mode Functions
 ;#########################
@@ -57,7 +59,9 @@ _ENABLE_A20:
 	
 	call _WAIT_KB_IB
 	mov al, 0xAE
-	out 0x64, al	
+	out 0x64, al
+	
+	call _WAIT_KB_IB
 	
 	sti
 	ret	
@@ -100,13 +104,15 @@ __GDT_POINTER:
 ;#########################
 ; Protected Mode Functions
 ;#########################
+BITS 32
 
 ROWS 		db 25
 COLUMNS 	db 80
 X 			db 0
-Y			db 10
+Y			db 0
 VIDSTART:	dd 0xB8000
 CHARATTRIB	db 0x0F
+BLANKCHAR 	db " "
 
 PrintChar:
 	cmp dl, 0x0A
@@ -149,8 +155,7 @@ PrintChar:
 	ret
 	
 PrintString:
-	;push edi
-	
+
   __STRING_LOOP:	
 	mov dl, BYTE [edi]
 	cmp dl, 0x0
@@ -163,14 +168,59 @@ PrintString:
   __PrintStringDONE:
 	ret
 	
+ClearScreen:
+	mov edi, [VIDSTART]
+	mov cx, 80*25
+	
+	mov ah, BYTE [CHARATTRIB]
+	mov al, BYTE [BLANKCHAR]
+	
+	rep stosw
+	
+	mov BYTE [X], 0x0
+	mov BYTE [Y], 0x0
+
+	ret
+
+UpdateCursor:
+	xor ax, ax
+	mov cx, ax
+	
+	mov al, BYTE [Y]
+	mov cl, BYTE [COLUMNS]
+	mul cl
+	mov cl, BYTE [X]
+	add al, cl
+	mov bl, al
+	
+	mov al, 0x0F
+	mov dx, 0x03D4
+	out dx, al
+	
+	mov al, bl
+	mov dx, 0x03D5
+	out dx, al
+	
+	mov al, 0x0E
+	mov dx, 0x03D4
+	out dx, al
+	
+	mov al, bh
+	mov dx, 0x03D5
+	out dx, al
+
+	ret
+
+	
 ;#########################
 ;######### Main Code Start
 ;#########################
+BITS 16
 
 __INITKRNL_START:
 	cli	
 	
-	mov ax, 0x0050
+	mov ax, 0x0000
 	mov ds, ax
 	mov es, ax
 	mov fs, ax
@@ -196,11 +246,32 @@ __INITKRNL_START:
 	or eax, 0x1
 	mov cr0, eax
 	
+	jmp 0x8:__PMODE
+	
+BITS 32
+__PMODE:
+
+	mov ax, 0x10
+	mov ds, ax
+	mov es, ax
+	mov ss, ax
+	mov esp, 0x90000
+
+	call ClearScreen
+
+	call UpdateCursor
+
 	mov edi, msgInProtectedMode
 	call PrintString
 	
 	mov edi, msgSecondStageLoaded
 	call PrintString
 	
+	call UpdateCursor
+	
 	cli	
 	hlt
+
+	msgInProtectedMode db "Entered protected mode.", 0x0A, 0x00
+	msgSecondStageLoaded db "Kernel loader loaded.", 0x0A, "**************************", 0x0A, 0x00	
+
