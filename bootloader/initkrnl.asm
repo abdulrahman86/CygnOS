@@ -241,7 +241,9 @@ __INITKRNL_START:
 	
 	mov si, msgEnteringProtectedMode
 	call _PrintMsg
-	
+
+	cli
+
 	mov eax, cr0
 	or eax, 0x1
 	mov cr0, eax
@@ -255,11 +257,9 @@ __PMODE:
 	mov ds, ax
 	mov es, ax
 	mov ss, ax
-	mov esp, 0x90000
+	mov esp, 0x500
 
 	call ClearScreen
-
-	call UpdateCursor
 
 	mov edi, msgInProtectedMode
 	call PrintString

@@ -165,8 +165,8 @@ __LOAD_FAT:
 	mov bx, 0x0000						;Location where second stage will be loaded
 	push bx
 	
-	mov ax, WORD [nextCluster]
 __LOAD_SECOND_STAGE_SECTS:
+	mov ax, WORD [nextCluster]	
 	call _ClusterToLBA
 	
 	xor cx, cx
