@@ -148,7 +148,7 @@ PrintChar:
 ;	jnz __PrintCharDONE
  
   __NEW_ROW:
-	mov BYTE [X], 0
+	mov BYTE [X], 0x0
 	inc BYTE [Y]
 	
   __PrintCharDONE:
@@ -191,7 +191,7 @@ UpdateCursor:
 	mul cl
 	mov cl, BYTE [X]
 	add al, cl
-	mov bl, al
+	mov bx, ax
 	
 	mov al, 0x0F
 	mov dx, 0x03D4
@@ -257,11 +257,11 @@ __PMODE:
 	mov ds, ax
 	mov es, ax
 	mov ss, ax
-	mov esp, 0x500
+	mov esp, 0x90000
 
 	call ClearScreen
 
-	mov edi, msgInProtectedMode
+	mov edi, msgWelcomeMessage
 	call PrintString
 	
 	mov edi, msgSecondStageLoaded
@@ -272,6 +272,6 @@ __PMODE:
 	cli	
 	hlt
 
-	msgInProtectedMode db "Entered protected mode.", 0x0A, 0x00
-	msgSecondStageLoaded db "Kernel loader loaded.", 0x0A, "**************************", 0x0A, 0x00	
+	msgWelcomeMessage db 0x0A, "          ************************************************************          ", 0x0A, "                              Welcome to Cygnus OS                              ", 0x0A, 0x00
+	msgSecondStageLoaded db "                              Kernel loader loaded                              ", 0x0A,  "          ************************************************************          ", 0x00	
 
