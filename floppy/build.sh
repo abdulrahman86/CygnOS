@@ -6,12 +6,15 @@ then
 fi
 mkfs.vfat -C ~/OS/floppy/floppy.img 1440
 
-nasm ~/OS/bootloader/boot.asm -o ~/OS/bootloader/boot.bin
-dd if=~/OS/bootloader/boot.bin of=~/OS/floppy/floppy.img bs=512 conv=notrunc
+curdir=$PWD
+cd ~/OS/bootloader/
+nasm boot.asm -o boot.bin
+dd if=boot.bin of=~/OS/floppy/floppy.img bs=512 conv=notrunc
+nasm -f bin initkrnl.asm -o INITKRNL.BIN
+cd $curdir
 
 losetup /dev/loop0 ~/OS/floppy/floppy.img
 mount -t vfat -o loop /dev/loop0 /media/floppy
-nasm -f bin ~/OS/bootloader/initkrnl.asm -o ~/OS/bootloader/INITKRNL.BIN
 cp ~/OS/bootloader/INITKRNL.BIN /media/floppy
 sleep 1
 umount /media/floppy

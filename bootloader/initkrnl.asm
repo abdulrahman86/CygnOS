@@ -11,6 +11,9 @@ msgEnteringProtectedMode db "Entering protected mode...", 0x0D, 0x0A, "*********
 ;##### Real Mode Functions
 ;#########################
 
+%include "FLOPPY.inc"
+%include "FAT12.inc"
+
 _PrintMsg:
 	lodsb
 	or al, al
@@ -71,7 +74,9 @@ _LOAD_GDT:
 	lgdt [__GDT_POINTER]
 	sti
 	ret	
-	
+
+
+
 ;#########################
 ;# Global Descriptor Table
 ;#########################
@@ -241,7 +246,7 @@ __INITKRNL_START:
 	
 	mov si, msgEnteringProtectedMode
 	call _PrintMsg
-
+	
 	cli
 
 	mov eax, cr0
@@ -268,7 +273,8 @@ __PMODE:
 	call PrintString
 	
 	call UpdateCursor
-	
+
+__END_AND_FAILURE:	
 	cli	
 	hlt
 
