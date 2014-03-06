@@ -2,9 +2,6 @@ BITS 16
 
 dataRegion			dw 0x0
 bufStart			dw 0x7E00
-nextCluster			dw 0x0
-kernelFileName		db "KRNL    BIN"
-msgKernelNotFound	db "Kernel file not found.", 0x0D, 0x0A
 
 _LoadRoot:
 	xor ax, ax
@@ -37,12 +34,12 @@ _LoadFAT:
 	
 	ret
 	
-_FIND_FILE:
+_FindFile:
 	mov cx, WORD [bpbNumberOfRootEnt]
 	mov di, WORD [bufStart]
 	
 _ROOT_FIND_FILE:
-   	mov si, kernelFileName
+	push si
    	push cx
    	push di
    	mov cx, 0x000B
@@ -51,15 +48,50 @@ _ROOT_FIND_FILE:
    	pop di   	
    	jz _FIND_FIRST_CLUSTER_FILE  	
    	add di, 0x0020
-   	pop cx   	
+   	pop cx   
+   	pop si	
    	loop _ROOT_FIND_FILE
    	
-   	mov si, msgKernelNotFound
-   	call _PrintMsg
-	jmp __END_AND_FAILURE
+   	mov ax, -1
+   	ret
 	
    _FIND_FIRST_CLUSTER_FILE:
    	mov cx, WORD [di + 0x001A]
    	mov WORD [nextCluster], cx
    	
    	ret
+   	
+_LoadFile:
+	mov ax, WORD [nextCluster]	
+	call _ClusterToLBA
+	
+	xor cx, cx
+	mov cl, BYTE [bpbSectorsPerCluster]
+	pop bx
+	call _GetSectors					
+	push bx
+
+   _READ_ALL_SECTS:
+   	mov ax, WORD [nextCluster]
+	mov cx, ax
+	mov dx, ax
+	shr cx, 0x0001						
+	add dx, cx							
+	mov bx, 0x0200
+	add bx, dx
+	mov dx, WORD [bx]
+	test ax, 0x0001						
+	jz _EVEN_CLUSTER
+	
+	shr dx, 0x0004
+	jmp _CHECK_LAST_CLUSTER
+	
+   _EVEN_CLUSTER:
+    and dx, 0x0FFF
+    
+   _CHECK_LAST_CLUSTER:
+    cmp dx, 0x0FF0
+    mov WORD [nextCluster], dx			
+    jnz _LoadFile
+    
+    ret

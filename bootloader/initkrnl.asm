@@ -6,6 +6,9 @@ jmp __INITKRNL_START
 
 msgSecondStageLoading db "**************************", 0x0D, 0x0A, "Loading kernel loader...", 0x0D, 0x0A, 0x00
 msgEnteringProtectedMode db "Entering protected mode...", 0x0D, 0x0A, "**************************", 0x0D, 0x0A, 0x00
+kernelFileName db "KERNEL  BIN"
+msgKernelNotFound db "Kernel file not found.", 0x0D, 0x0A
+nextCluster dw 0x0
 	
 ;#########################
 ;##### Real Mode Functions
@@ -15,13 +18,16 @@ msgEnteringProtectedMode db "Entering protected mode...", 0x0D, 0x0A, "*********
 %include "FAT12.inc"
 
 _PrintMsg:
+	pusha
+ __PrintMsgLoop:
 	lodsb
 	or al, al
 	jz __PrintMsgDone
 	mov ah, 0Eh
 	int 10h
-	jmp _PrintMsg
+	jmp __PrintMsgLoop
  __PrintMsgDone:
+ 	popa
 	ret	
 
 _WAIT_KB_IB:
@@ -74,8 +80,6 @@ _LOAD_GDT:
 	lgdt [__GDT_POINTER]
 	sti
 	ret	
-
-
 
 ;#########################
 ;# Global Descriptor Table
@@ -247,6 +251,25 @@ __INITKRNL_START:
 	mov si, msgEnteringProtectedMode
 	call _PrintMsg
 	
+	call _LoadFAT
+	
+	call _LoadRoot
+	
+	mov si, kernelFileName
+	mov WORD [nextCluster], 0x0
+	call _FindFile
+	cmp ax, -1
+	jnz __KERNEL_FOUND
+	
+	mov si, msgKernelNotFound
+	call _PrintMsg		
+	jmp __END_AND_FAILURE
+	
+	mov es, 0x1000
+	push 0x0
+	call _LoadFile
+	
+__KERNEL_FOUND:
 	cli
 
 	mov eax, cr0
