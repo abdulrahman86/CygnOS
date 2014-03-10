@@ -11,11 +11,14 @@ cd ~/OS/bootloader/
 nasm boot.asm -o boot.bin
 dd if=boot.bin of=~/OS/floppy/floppy.img bs=512 conv=notrunc
 nasm -f bin initkrnl.asm -o INITKRNL.BIN
+cd ~/OS/kernel/
+nasm kernelmain.asm -o KERNEL.BIN
 cd $curdir
 
 losetup /dev/loop0 ~/OS/floppy/floppy.img
 mount -t vfat -o loop /dev/loop0 /media/floppy
 cp ~/OS/bootloader/INITKRNL.BIN /media/floppy
+cp ~/OS/kernel/KERNEL.BIN /media/floppy/
 sleep 1
 umount /media/floppy
 losetup -d /dev/loop0
