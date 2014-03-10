@@ -4,11 +4,11 @@ org 0x500
 
 jmp __INITKRNL_START
 
-msgSecondStageLoading db "**************************", 0x0D, 0x0A, "Loading kernel loader...", 0x0D, 0x0A, 0x00
-msgEnteringProtectedMode db "Entering protected mode...", 0x0D, 0x0A, "**************************", 0x0D, 0x0A, 0x00
-kernelFileName db "KERNEL  BIN"
-msgKernelNotFound db "Kernel file not found.", 0x0D, 0x0A
-nextCluster dw 0x0
+msgSecondStageLoading 		db "**************************", 0x0D, 0x0A, "Loading kernel loader...", 0x0D, 0x0A, 0x00
+msgEnteringProtectedMode 	db "Entering protected mode...", 0x0D, 0x0A, "**************************", 0x0D, 0x0A, 0x00
+kernelFileName 				db "KERNEL  BIN"
+msgKernelNotFound 			db "Kernel file not found.", 0x0D, 0x0A, 0x00
+fileSize					dw 0x0
 	
 ;#########################
 ;##### Real Mode Functions
@@ -111,117 +111,6 @@ __GDT_POINTER:
 	dd __GDT_START
 
 ;#########################
-; Protected Mode Functions
-;#########################
-BITS 32
-
-ROWS 		db 25
-COLUMNS 	db 80
-X 			db 0
-Y			db 0
-VIDSTART:	dd 0xB8000
-CHARATTRIB	db 0x0F
-BLANKCHAR 	db " "
-
-PrintChar:
-	cmp dl, 0x0A
-	je __NEW_ROW
-
-	mov esi, [VIDSTART]
-
-	xor ecx, ecx
-	mov eax, ecx
-	mov al, BYTE [COLUMNS]
-	mov cl, 0x02
-	mul cl
-	mov cl, BYTE [Y]
-	mul cl
-	push eax
-
-	mov cl, 0x02
-	xor eax, eax
-	mov al, BYTE [X]
-	mul cl
-	pop ecx
-	add eax, ecx
-	add esi, eax
-	
-	mov dh, BYTE [CHARATTRIB]
-	mov WORD [esi], dx
-	
-	inc BYTE [X]
-	mov bl, BYTE [COLUMNS]
-	cmp BYTE [X], bl
-	je __NEW_ROW
-	jmp __PrintCharDONE
-;	jnz __PrintCharDONE
- 
-  __NEW_ROW:
-	mov BYTE [X], 0x0
-	inc BYTE [Y]
-	
-  __PrintCharDONE:
-	ret
-	
-PrintString:
-
-  __STRING_LOOP:	
-	mov dl, BYTE [edi]
-	cmp dl, 0x0
-	je __PrintStringDONE
-	call PrintChar
-	
-	inc edi
-	jmp __STRING_LOOP
-	
-  __PrintStringDONE:
-	ret
-	
-ClearScreen:
-	mov edi, [VIDSTART]
-	mov cx, 80*25
-	
-	mov ah, BYTE [CHARATTRIB]
-	mov al, BYTE [BLANKCHAR]
-	
-	rep stosw
-	
-	mov BYTE [X], 0x0
-	mov BYTE [Y], 0x0
-
-	ret
-
-UpdateCursor:
-	xor ax, ax
-	mov cx, ax
-	
-	mov al, BYTE [Y]
-	mov cl, BYTE [COLUMNS]
-	mul cl
-	mov cl, BYTE [X]
-	add al, cl
-	mov bx, ax
-	
-	mov al, 0x0F
-	mov dx, 0x03D4
-	out dx, al
-	
-	mov al, bl
-	mov dx, 0x03D5
-	out dx, al
-	
-	mov al, 0x0E
-	mov dx, 0x03D4
-	out dx, al
-	
-	mov al, bh
-	mov dx, 0x03D5
-	out dx, al
-
-	ret
-
-	
-;#########################
 ;######### Main Code Start
 ;#########################
 BITS 16
@@ -251,23 +140,21 @@ __INITKRNL_START:
 	mov si, msgEnteringProtectedMode
 	call _PrintMsg
 	
-	call _LoadFAT
-	
-	call _LoadRoot
-	
 	mov si, kernelFileName
-	mov WORD [nextCluster], 0x0
-	call _FindFile
-	cmp ax, -1
-	jnz __KERNEL_FOUND
-	
-	mov si, msgKernelNotFound
-	call _PrintMsg		
-	jmp __END_AND_FAILURE
-	
-	mov es, 0x1000
-	push 0x0
+	mov dx, 0x1000
+	mov bx, 0x0
 	call _LoadFile
+
+	cmp ax, -1
+	jnz __CHECK_ERROR_2
+	mov si, msgKernelNotFound
+	call _PrintMsg
+	jmp __END_AND_FAILURE
+
+__CHECK_ERROR_2:
+	cmp ax, -2
+	jnz __KERNEL_FOUND
+	jmp __END_AND_FAILURE
 	
 __KERNEL_FOUND:
 	cli
@@ -276,31 +163,33 @@ __KERNEL_FOUND:
 	or eax, 0x1
 	mov cr0, eax
 	
-	jmp 0x8:__PMODE
+	jmp 0x8:__LOAD_KERNEL
 	
 BITS 32
-__PMODE:
+__LOAD_KERNEL:
 
 	mov ax, 0x10
 	mov ds, ax
 	mov es, ax
 	mov ss, ax
 	mov esp, 0x90000
-
-	call ClearScreen
-
-	mov edi, msgWelcomeMessage
-	call PrintString
 	
-	mov edi, msgSecondStageLoaded
-	call PrintString
+	xor eax, eax
+	mov ebx, eax
+	mov ecx, eax
+	mov ax, WORD [fileSize]
+	mov bx, WORD [bpbBytesPerSector]
+	mul bx
+	shr ax, 0x02
+	cld
+	mov esi, 0x10000
+	mov edi, 0x100000
+	mov ecx, eax
+	rep movsd
 	
-	call UpdateCursor
+	jmp 0x8:0x100000
 
 __END_AND_FAILURE:	
 	cli	
 	hlt
-
-	msgWelcomeMessage db 0x0A, "          ************************************************************          ", 0x0A, "                              Welcome to Cygnus OS                              ", 0x0A, 0x00
-	msgSecondStageLoaded db "                              Kernel loader loaded                              ", 0x0A,  "          ************************************************************          ", 0x00	
 
