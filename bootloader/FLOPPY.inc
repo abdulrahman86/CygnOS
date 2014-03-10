@@ -19,8 +19,6 @@ ebpbVolumeID		 :	DD 0xAAABACAD
 ebpbVolume			 : 	DB "BOOT FLOPPY"
 ebpbFileSystem		 :	DB "FAT12   "
 
-msgGetSectorsError	db "Error in loading sectors off disk", 0x0D, 0x0A
-
 _GetSectors:
 		push ax
 		push bx
@@ -33,16 +31,15 @@ _GetSectors:
 		int 13h
 		jnc ReadSuccess
 		
-		mov si, msgGetSectorsError
-		call _PrintMsg
-		jmp __END_AND_FAILURE
+		mov ax, -2		
+		ret
 		
 	ReadSuccess:
 		pop cx
 		pop bx
 		pop ax
 		inc ax								
-		add bx, WORD [bpbBytesPerSector]	
+		add bx, WORD [bpbBytesPerSector]
 		loop _GetSectors
 		ret
 

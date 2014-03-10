@@ -2,6 +2,8 @@ BITS 16
 
 dataRegion			dw 0x0
 bufStart			dw 0x7E00
+nextCluster 		dw 0x0
+msgGetSectorsError	db "Error in loading sectors off disk", 0x0D, 0x0A
 
 _LoadRoot:
 	xor ax, ax
@@ -35,18 +37,20 @@ _LoadFAT:
 	ret
 	
 _FindFile:
+	call _LoadRoot	
+	
 	mov cx, WORD [bpbNumberOfRootEnt]
 	mov di, WORD [bufStart]
 	
 _ROOT_FIND_FILE:
 	push si
-   	push cx
-   	push di
-   	mov cx, 0x000B
-   	repe cmpsb
-   	cmp cx, 0x0000
-   	pop di   	
-   	jz _FIND_FIRST_CLUSTER_FILE  	
+	push cx
+	push di
+	mov cx, 0x000B
+  	rep cmpsb
+	pop di
+	cmp cx, 0x0
+   	jz _FIND_FIRST_CLUSTER_FILE
    	add di, 0x0020
    	pop cx   
    	pop si	
@@ -59,25 +63,53 @@ _ROOT_FIND_FILE:
    	mov cx, WORD [di + 0x001A]
    	mov WORD [nextCluster], cx
    	
+   	pop cx
+   	pop si
+ 
    	ret
    	
 _LoadFile:
+	push bx
+	push dx	
+	
+	xor ax, ax
+	call _FindFile	
+	cmp ax, -1
+	jnz _FILE_FOUND
+	
+	ret
+	
+   _FILE_FOUND:
+   	call _LoadFAT
+   
+	pop dx
+	mov es, dx
+
+   _READ_FILE:
 	mov ax, WORD [nextCluster]	
 	call _ClusterToLBA
 	
 	xor cx, cx
 	mov cl, BYTE [bpbSectorsPerCluster]
+	add WORD [fileSize], cx
+	
 	pop bx
-	call _GetSectors					
-	push bx
-
+	call _GetSectors
+	cmp ax, -2
+	jnz _READ_ALL_SECTS
+	
+	mov si, msgGetSectorsError
+	call _PrintMsg
+	ret
+   
    _READ_ALL_SECTS:
+	push bx   
    	mov ax, WORD [nextCluster]
 	mov cx, ax
 	mov dx, ax
 	shr cx, 0x0001						
 	add dx, cx							
-	mov bx, 0x0200
+	mov bx, WORD [bufStart]
 	add bx, dx
 	mov dx, WORD [bx]
 	test ax, 0x0001						
@@ -92,6 +124,7 @@ _LoadFile:
    _CHECK_LAST_CLUSTER:
     cmp dx, 0x0FF0
     mov WORD [nextCluster], dx			
-    jnz _LoadFile
-    
+    jnz _READ_FILE
+	
+	pop bx
     ret
