@@ -192,26 +192,26 @@ __LOAD_SECOND_STAGE_SECTS__:
 	jmp 	_CHECK_LAST_CLUSTER_
 	
    _EVEN_CLUSTER_:
-    and 	dx, 0x0FFF
+    	and 	dx, 0x0FFF
     
    _CHECK_LAST_CLUSTER_:
-    cmp 	dx, 0x0FF0
-    mov 	WORD [numNextCluster], dx						;dx has next cluster number
-    jnz 	__LOAD_SECOND_STAGE_SECTS__
+    	cmp 	dx, 0x0FF0
+    	mov 	WORD [numNextCluster], dx						;dx has next cluster number
+    	jnz 	__LOAD_SECOND_STAGE_SECTS__
     
-    mov 	si, msgBootComplete
-    call 	__PrintMessage_
+    	mov 	si, msgBootComplete
+    	call 	__PrintMessage_
     
-    push 	WORD 0x0050								;CS for second stage
-    push 	WORD 0x0000								;IP for second stage
-    retf
+    	push 	WORD 0x0050								;CS for second stage
+    	push 	WORD 0x0000								;IP for second stage
+	retf
 	
 __END_AND_FAILURE__:
 	mov 	si, msgFailure
 	call 	__PrintMessage_
 	mov 	ah, 0x0
-	int 	16h										;Wait for keypress (ah=0)
-	int 	19h										;Reboot
+	int 	16h									;Wait for keypress (ah=0)
+	int 	19h									;Reboot
 
 ;#########################################
 ;############### Zero out remaining bytes
