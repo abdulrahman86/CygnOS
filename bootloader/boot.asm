@@ -3,28 +3,28 @@ org 0x0
 
 jmp __SEGMENTS_INIT__
 
-bpbOEMName					DB "Sunny S "
+bpbOEMName				DB "Sunny S "
 ;##########################################
 ;#################### BIOS Parameter Block 
 ;##########################################
 
 bpbBytesPerSector		:	DW 512
-bpbSectorsPerCluster	:	DB 1
+bpbSectorsPerCluster		:	DB 1
 bpbReservedSectors		:	DW 1
 bpbNumberOfFATs			:	DB 2
 bpbNumberOfRootEnt		:	DW 224
 bpbTotalSectors			:	DW 2880
-bpbMedia				:	DB 0xF0
+bpbMedia			:	DB 0xF0
 bpbSectorsPerFAT		:	DW 9
 bpbSectorsPerTrack		:	DW 18
 bpbNumberOfHeads		:	DW 2
 bpbHiddenSectors		:	DD 0
 bpbBigSectors			:	DD 0
 ebpbDriveNumber			:	DB 0x0
-ebpbFlags				:	DB 0
+ebpbFlags			:	DB 0
 ebpbSignature			:	DB 0x29
 ebpbVolumeID			:	DD 0xAAABACAD
-ebpbVolume				: 	DB "BOOT FLOPPY"
+ebpbVolume			: 	DB "BOOT FLOPPY"
 ebpbFileSystem			:	DB "FAT12   "
 
 ;#########################################
@@ -33,7 +33,7 @@ ebpbFileSystem			:	DB "FAT12   "
 
 __VARIABLES_DECL__:
 	msgBootStarting  		DB 0x0D, 0x0A, "**************************", 0x0D, 0x0A, "Boot starting...", 0x0D, 0x0A, 0x00
-	msgFailure 		 		DB "Error in loading the operating system...", 0x0D, 0x0A, 0x00
+	msgFailure 	 		DB "Error in loading the operating system...", 0x0D, 0x0A, 0x00
 	msgBootComplete	 		DB "Boot finished.", 0x0D, 0x0A, 0x00
 	nameSecondStage  		DB "INITKRNLBIN"
 	numNextCluster 	 		DW 0
@@ -44,8 +44,8 @@ __FUNCTIONS_DECL__:
 
 	__PrintMessage_:
 		lodsb
-		or 		al, al
-		jz 		_Done_
+		or 	al, al
+		jz 	_Done_
 		mov 	ah, 0Eh
 		int 	10h
 		jmp 	__PrintMessage_
@@ -70,8 +70,8 @@ __FUNCTIONS_DECL__:
 		pop 	cx
 		pop 	bx
 		pop 	ax
-		inc 	ax									;Point to next sector to read from 
-		add 	bx, WORD [bpbBytesPerSector]		;advance write pointer to next block
+		inc 	ax								;Point to next sector to read from 
+		add 	bx, WORD [bpbBytesPerSector]					;advance write pointer to next block
 		loop 	__GetSectors_
 		ret
 	
@@ -120,11 +120,11 @@ __LOAD_ROOT__:
 	mov 	ax, 0x0020
 	mul 	WORD [bpbNumberOfRootEnt]
 	div 	WORD [bpbBytesPerSector]
-	xchg 	ax, cx                     				;cx now has number of sectors used by root directory
+	xchg 	ax, cx          		           				;cx now has number of sectors used by root directory
 	
 	mov 	al, BYTE [bpbNumberOfFATs]
 	mul 	WORD [bpbSectorsPerFAT]
-	add 	ax, WORD [bpbReservedSectors]			;ax now has number of sectors before root directory by 0-based addressing
+	add 	ax, WORD [bpbReservedSectors]						;ax now has number of sectors before root directory by 0-based addressing
 	
 	mov 	WORD [addrDataRegion], ax
 	add 	WORD [addrDataRegion], cx
@@ -143,7 +143,7 @@ __LOAD_ROOT__:
    	repe 	cmpsb
    	cmp 	cx, 0x0000
    	pop 	di   	
-   	jz 		_FIND_FIRST_CLUSTER_II_STAGE_  	
+   	jz 	_FIND_FIRST_CLUSTER_II_STAGE_  	
    	add 	di, 0x0020
    	pop 	cx   	
    	loop 	_ROOT_FIND_II_STAGE_
@@ -173,7 +173,7 @@ __LOAD_SECOND_STAGE_SECTS__:
 	xor 	cx, cx
 	mov 	cl, BYTE [bpbSectorsPerCluster]
 	pop 	bx
-	call 	__GetSectors_							;Get file cluster
+	call 	__GetSectors_								;Get file cluster
 	push 	bx
 
    _READ_ALL_SECTS_:
@@ -186,32 +186,32 @@ __LOAD_SECOND_STAGE_SECTS__:
 	add 	bx, dx
 	mov 	dx, WORD [bx]
 	test 	ax, 0x0001								;Similar to AND but does not change register values
-	jz 		_EVEN_CLUSTER_
+	jz 	_EVEN_CLUSTER_
 	
 	shr 	dx, 0x0004
 	jmp 	_CHECK_LAST_CLUSTER_
 	
    _EVEN_CLUSTER_:
-    and 	dx, 0x0FFF
+    	and 	dx, 0x0FFF
     
    _CHECK_LAST_CLUSTER_:
-    cmp 	dx, 0x0FF0
-    mov 	WORD [numNextCluster], dx				;dx has next cluster number
-    jnz 	__LOAD_SECOND_STAGE_SECTS__
+    	cmp 	dx, 0x0FF0
+    	mov 	WORD [numNextCluster], dx						;dx has next cluster number
+    	jnz 	__LOAD_SECOND_STAGE_SECTS__
     
-    mov 	si, msgBootComplete
-    call 	__PrintMessage_
+    	mov 	si, msgBootComplete
+    	call 	__PrintMessage_
     
-    push 	WORD 0x0050								;CS for second stage
-    push 	WORD 0x0000								;IP for second stage
-    retf
+    	push 	WORD 0x0050								;CS for second stage
+    	push 	WORD 0x0000								;IP for second stage
+	retf
 	
 __END_AND_FAILURE__:
 	mov 	si, msgFailure
 	call 	__PrintMessage_
 	mov 	ah, 0x0
-	int 	16h										;Wait for keypress (ah=0)
-	int 	19h										;Reboot
+	int 	16h									;Wait for keypress (ah=0)
+	int 	19h									;Reboot
 
 ;#########################################
 ;############### Zero out remaining bytes
