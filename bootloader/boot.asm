@@ -49,6 +49,7 @@ __FUNCTIONS_DECL__:
 		mov 	ah, 0Eh
 		int 	10h
 		jmp 	__PrintMessage_
+		
 	_Done_:
 		ret
 	
@@ -73,6 +74,7 @@ __FUNCTIONS_DECL__:
 		inc 	ax								;Point to next sector to read from 
 		add 	bx, WORD [bpbBytesPerSector]					;advance write pointer to next block
 		loop 	__GetSectors_
+		
 		ret
 	
 	__LBAtoCHS_:
@@ -84,6 +86,7 @@ __FUNCTIONS_DECL__:
 		div 	WORD [bpbNumberOfHeads]
 		mov 	dh, dl
 		mov 	ch, al
+		
 		ret
 		
 	__ClusterToLBA_:
@@ -92,6 +95,7 @@ __FUNCTIONS_DECL__:
 		mov 	cl, BYTE [bpbSectorsPerCluster]
 		mul 	cl
 		add 	ax, WORD [addrDataRegion]
+		
 		ret
 
 __SEGMENTS_INIT__:

@@ -2,13 +2,13 @@ BITS 16
 
 org 0x500
 
-jmp __INITKRNL_START
+jmp __INITKRNL_START__
 
-msgSecondStageLoading 		db "**************************", 0x0D, 0x0A, "Loading kernel loader...", 0x0D, 0x0A, 0x00
-msgEnteringProtectedMode 	db "Entering protected mode...", 0x0D, 0x0A, "**************************", 0x0D, 0x0A, 0x00
-kernelFileName 				db "KERNEL  BIN"
-msgKernelNotFound 			db "Kernel file not found.", 0x0D, 0x0A, 0x00
-fileSize					dw 0x0
+msgSecondStageLoading 			DB "**************************", 0x0D, 0x0A, "Loading kernel loader...", 0x0D, 0x0A, 0x00
+msgEnteringProtectedMode 		DB "Entering protected mode...", 0x0D, 0x0A, "**************************", 0x0D, 0x0A, 0x00
+nameKernelFile 				DB "KERNEL  BIN"
+msgKernelNotFound 			DB "Kernel file not found.", 0x0D, 0x0A, 0x00
+numFileSize				DW 0x0
 	
 ;#########################
 ;##### Real Mode Functions
@@ -17,179 +17,185 @@ fileSize					dw 0x0
 %include "FLOPPY.inc"
 %include "FAT12.inc"
 
-_PrintMsg:
+__PrintMsg_:
 	pusha
- __PrintMsgLoop:
-	lodsb
-	or al, al
-	jz __PrintMsgDone
-	mov ah, 0Eh
-	int 10h
-	jmp __PrintMsgLoop
- __PrintMsgDone:
- 	popa
-	ret	
+	
+	_PrintMsgLoop_:
+		lodsb
+		or 	al, al
+		jz 	_PrintMsgDone_
+		mov 	ah, 0Eh
+		int 	10h
+		jmp 	_PrintMsgLoop_
+	
+	 _PrintMsgDone_:
+ 		popa
+		ret	
 
-_WAIT_KB_IB:
-	in al, 0x64
-	test al, 0x02
-	jnz _WAIT_KB_IB
+__WAIT_KB_IB_:
+	in 	al, 0x64
+	test 	al, 0x02
+	jnz 	__WAIT_KB_IB_
+	
 	ret
 
-_WAIT_KB_OB:
-	in al, 0x64
-	test al, 0x01
-	jz _WAIT_KB_OB
+__WAIT_KB_OB_:
+	in 	al, 0x64
+	test 	al, 0x01
+	jz 	__WAIT_KB_OB_
+	
 	ret
 
-_ENABLE_A20:
+__ENABLE_A20_:
 	cli	
 	
-	call _WAIT_KB_IB
-	mov al, 0xAD
-	out 0x64, al
+	call 	__WAIT_KB_IB_
+	mov 	al, 0xAD
+	out 	0x64, al
 
-	call _WAIT_KB_IB
-	mov al, 0xD0
-	out 0x64, al
+	call 	__WAIT_KB_IB_
+	mov 	al, 0xD0
+	out 	0x64, al
 	
-	call _WAIT_KB_OB
-	in al, 0x60
-	push ax
+	call 	__WAIT_KB_OB_
+	in 	al, 0x60
+	push 	ax
 	
-	call _WAIT_KB_IB
-	mov al, 0xD1
-	out 0x64, al
+	call 	__WAIT_KB_IB_
+	mov 	al, 0xD1
+	out 	0x64, al
 	
-	call _WAIT_KB_IB
-	pop ax
-	or al, 0x02
-	out 0x60, al
+	call 	__WAIT_KB_IB_
+	pop 	ax
+	or 	al, 0x02
+	out 	0x60, al
 	
-	call _WAIT_KB_IB
-	mov al, 0xAE
-	out 0x64, al
+	call 	__WAIT_KB_IB_
+	mov 	al, 0xAE
+	out 	0x64, al
 	
-	call _WAIT_KB_IB
+	call 	__WAIT_KB_IB_
 	
 	sti
 	ret	
 	
-_LOAD_GDT:	
+__LOAD_GDT_:
 	cli
-	lgdt [__GDT_POINTER]
+	lgdt 	[__GDT_POINTER__]
 	sti
+	
 	ret	
 
 ;#########################
 ;# Global Descriptor Table
 ;#########################
-__GDT_START:
-_NULL_DESCRIPTOR:
-	dd 0x0
-	dd 0x0
-	
-_CODE_DESCRIPTOR:
-	dw 0xFFFF
-	dw 0x0
-	db 0x0
-	db 10011010b
-	db 11001111b
-	db 0x0
-	
-_DATA_DESCRIPTOR:
-	dw 0xFFFF
-	dw 0x0
-	db 0x0
-	db 10010010b
-	db 11001111b
-	db 0x0
-__GDT_END:
+__GDT_START__:
 
-__GDT_POINTER:
-	dw __GDT_END - __GDT_START - 1
-	dd __GDT_START
+	_NULL_DESCRIPTOR_:
+		DD 0x0
+		DD 0x0
+	
+	_CODE_DESCRIPTOR_:
+		DW 0xFFFF
+		DW 0x0
+		DB 0x0
+		DB 10011010b
+		DB 11001111b
+		DB 0x0
+	
+	_DATA_DESCRIPTOR_:
+		DW 0xFFFF
+		DW 0x0
+		DB 0x0
+		DB 10010010b
+		DB 11001111b
+		DB 0x0
+__GDT_END__:
+
+__GDT_POINTER__:
+		DW __GDT_END__ - __GDT_START__ - 1
+		DD __GDT_START__
 
 ;#########################
 ;######### Main Code Start
 ;#########################
 BITS 16
 
-__INITKRNL_START:
+__INITKRNL_START__:
 	cli	
 	
-	mov ax, 0x0000
-	mov ds, ax
-	mov es, ax
-	mov fs, ax
-	mov gs, ax
+	mov 	ax, 0x0000
+	mov 	ds, ax
+	mov 	es, ax
+	mov 	fs, ax
+	mov 	gs, ax
 	
-	mov ax, 0x9000
-	mov ss, ax
-	mov sp, 0xFFFF
+	mov 	ax, 0x9000
+	mov 	ss, ax
+	mov 	sp, 0xFFFF
 	
 	sti
 	
-	mov si, msgSecondStageLoading
-	call _PrintMsg
+	mov 	si, msgSecondStageLoading
+	call 	__PrintMsg_
 	
-	call _LOAD_GDT
+	call 	__LOAD_GDT_
 	
-	call _ENABLE_A20
+	call 	__ENABLE_A20_
 	
-	mov si, msgEnteringProtectedMode
-	call _PrintMsg
+	mov 	si, msgEnteringProtectedMode
+	call 	__PrintMsg_
 	
-	mov si, kernelFileName
-	mov dx, 0x1000
-	mov bx, 0x0
-	call _LoadFile
+	mov 	si, nameKernelFile
+	mov 	dx, 0x1000
+	mov 	bx, 0x0
+	call 	__LoadFile_
 
-	cmp ax, -1
-	jnz __CHECK_ERROR_2
-	mov si, msgKernelNotFound
-	call _PrintMsg
-	jmp __END_AND_FAILURE
+	cmp 	ax, -1
+	jnz 	__CHECK_ERROR_2__
+	mov 	si, msgKernelNotFound
+	call 	__PrintMsg_
+	jmp 	__END_AND_FAILURE__
 
-__CHECK_ERROR_2:
-	cmp ax, -2
-	jnz __KERNEL_FOUND
-	jmp __END_AND_FAILURE
+__CHECK_ERROR_2__:
+	cmp 	ax, -2
+	jnz 	__KERNEL_FOUND__
+	jmp 	__END_AND_FAILURE__
 	
-__KERNEL_FOUND:
+__KERNEL_FOUND__:
 	cli
 
-	mov eax, cr0
-	or eax, 0x1
-	mov cr0, eax
+	mov 	eax, cr0
+	or 	eax, 0x1
+	mov 	cr0, eax
 	
-	jmp 0x8:__LOAD_KERNEL
+	jmp 	0x8:__LOAD_KERNEL__
 	
 BITS 32
-__LOAD_KERNEL:
+__LOAD_KERNEL__:
 
-	mov ax, 0x10
-	mov ds, ax
-	mov es, ax
-	mov ss, ax
-	mov esp, 0x90000
+	mov 	ax, 0x10
+	mov 	ds, ax
+	mov 	es, ax
+	mov 	ss, ax
+	mov 	esp, 0x90000
 	
-	xor eax, eax
-	mov ebx, eax
-	mov ecx, eax
-	mov ax, WORD [fileSize]
-	mov bx, WORD [bpbBytesPerSector]
-	mul bx
-	shr ax, 0x02
+	xor 	eax, eax
+	mov 	ebx, eax
+	mov 	ecx, eax
+	mov 	ax, WORD [numFileSize]
+	mov 	bx, WORD [bpbBytesPerSector]
+	mul 	bx
+	shr 	ax, 0x02
 	cld
-	mov esi, 0x10000
-	mov edi, 0x100000
-	mov ecx, eax
-	rep movsd
+	mov 	esi, 0x10000
+	mov 	edi, 0x100000
+	mov 	ecx, eax
+	rep 	movsd
 	
-	jmp 0x8:0x100000
+	jmp 	0x8:0x100000
 
-__END_AND_FAILURE:	
+__END_AND_FAILURE__:
 	cli	
 	hlt
 
