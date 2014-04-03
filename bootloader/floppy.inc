@@ -31,8 +31,7 @@ __GetSectors_:
 	int 	13h
 	jnc 	_ReadSuccess_
 		
-	mov 	ax, -2
-				
+	mov 	ax, -2			
 	ret
 		
 	_ReadSuccess_:
@@ -43,13 +42,14 @@ __GetSectors_:
 		add 	bx, WORD [bpbBytesPerSector]
 		loop 	__GetSectors_
 		
-		ret
+	ret
 
 __LBAtoCHS_:
 	xor 	dx, dx
 	div 	WORD [bpbSectorsPerTrack]
 	inc 	dl
 	mov 	cl, dl
+	
 	xor 	dx, dx
 	div 	WORD [bpbNumberOfHeads]
 	mov 	dh, dl

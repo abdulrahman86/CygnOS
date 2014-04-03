@@ -25,7 +25,14 @@ __LoadRoot_:
 	mov 	bx, WORD [bufStart]
 	call 	__GetSectors_
 	
-	ret
+	cmp 	ax, -2
+	jnz	_LoadRoot_End_
+	
+	mov	si, msgGetSectorsError
+	call	__PrintMsg_	
+	
+	_LoadRoot_End_:
+		ret
 
 __LoadFAT_:
 	mov 	cx, WORD [bpbSectorsPerFAT]
@@ -34,13 +41,26 @@ __LoadFAT_:
 	mov 	bx, WORD [bufStart]
 	call 	__GetSectors_
 	
-	ret
+	cmp	ax, -2
+	jnz	_LoadFAT_End_
+	
+	mov	si, msgGetSectorsError
+	call	__PrintMsg_
+
+
+	_LoadFAT_End_:	
+		ret
 	
 __FindFile_:
 	call 	__LoadRoot_
-	
-	mov 	cx, WORD [bpbNumberOfRootEnt]
-	mov 	di, WORD [bufStart]
+	cmp	ax, -2
+	jnz	_LoadRoot_Success_
+
+	ret	
+
+	_LoadRoot_Success_:	
+		mov 	cx, WORD [bpbNumberOfRootEnt]
+		mov 	di, WORD [bufStart]
 	
 	_Root_Find_File_:
 		push 	si
@@ -75,14 +95,23 @@ __LoadFile_:
 	
 	xor 	ax, ax
 	call 	__FindFile_
-	cmp 	ax, -1
-	jnz 	_File_Found_
-	
+
+	cmp 	ax, -2
+	jnz 	_Check_Error_1_LoadFile_
+	ret
+
+  _Check_Error_1_LoadFile_:
+	cmp	ax, -1
+	jnz	_File_Found_
 	ret
 	
    _File_Found_:
    		call 	__LoadFAT_
-   
+		cmp 	ax, -2
+		jnz	_LoadFAT_Success_	
+		ret
+
+  _LoadFAT_Success_:   
 		pop 	dx
 		mov 	es, dx
 
