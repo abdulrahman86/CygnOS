@@ -6,6 +6,9 @@ nextCluster 			DW 0x0
 msgGetSectorsError		DB "Error in loading sectors off disk", 0x0D, 0x0A
 
 __LoadRoot_:
+	push 	bx
+	push	dx
+
 	xor 	ax, ax
 	mov 	cx, ax
 	mov 	dx, ax
@@ -32,9 +35,14 @@ __LoadRoot_:
 	call	__PrintMsg_	
 	
 	_LoadRoot_End_:
+		pop	dx
+		pop 	bx
 		ret
 
 __LoadFAT_:
+	push	bx	
+	push	dx
+	
 	mov 	cx, WORD [bpbSectorsPerFAT]
 	mov 	ax, WORD [bpbReservedSectors]
 	
@@ -49,6 +57,8 @@ __LoadFAT_:
 
 
 	_LoadFAT_End_:	
+		pop	dx
+		pop	bx
 		ret
 	
 __FindFile_:
@@ -90,10 +100,6 @@ __FindFile_:
    	ret
    	
 __LoadFile_:
-	push 	bx
-	push 	dx	
-	
-	xor 	ax, ax
 	call 	__FindFile_
 
 	cmp 	ax, -2
@@ -112,7 +118,7 @@ __LoadFile_:
 		ret
 
   _LoadFAT_Success_:   
-		pop 	dx
+		push	bx
 		mov 	es, dx
 
    _Read_File_:
