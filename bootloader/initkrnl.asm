@@ -4,8 +4,8 @@ org 0x500
 
 jmp __INITKRNL_START__
 
-msgSecondStageLoading 			DB "**************************", 0x0D, 0x0A, "Loading kernel loader...", 0x0D, 0x0A, 0x00
-msgEnteringProtectedMode 		DB "Entering protected mode...", 0x0D, 0x0A, "**************************", 0x0D, 0x0A, 0x00
+msgSecondStageLoading 			DB 0x0D, 0x0A, "**************************", 0x0D, 0x0A, 0x0D, 0x0A, "Loading kernel loader...", 0x0D, 0x0A, 0x00
+msgEnteringProtectedMode 		DB "Entering protected mode...", 0x0D, 0x0A, 0x00
 nameKernelFile 				DB "KERNEL  BIN"
 msgKernelNotFound 			DB "Kernel file not found.", 0x0D, 0x0A, 0x00
 numFileSize				DW 0x0
@@ -159,11 +159,11 @@ __Check_Error_2__:
 	cmp 	ax, -2
 	jnz 	__Kernel_Found__
 	jmp 	__End_And_Failure__
-
-	mov 	si, msgEnteringProtectedMode
-	call 	__PrintMsg_
 	
 __Kernel_Found__:
+;	mov 	si, msgEnteringProtectedMode
+;	call 	__PrintMsg_
+
 	cli
 
 	mov 	eax, cr0

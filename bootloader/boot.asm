@@ -32,7 +32,7 @@ ebpbFileSystem			:	DB "FAT12   "
 ;#########################################
 
 __VARIABLES_DECL__:
-	msgBootStarting  		DB 0x0D, 0x0A, "**************************", 0x0D, 0x0A, "Boot starting...", 0x0D, 0x0A, 0x00
+	msgBootStarting  		DB 0x0D, 0x0A, "**************************", 0x0D, 0x0A, 0x0D, 0x0A, "Booting Cygnus OS...", 0x0D, 0x0A, 0x00
 	msgFailure 	 		DB "Error in loading the operating system...", 0x0D, 0x0A, 0x00
 	msgBootComplete	 		DB "Boot finished.", 0x0D, 0x0A, 0x00
 	nameSecondStage  		DB "INITKRNLBIN"
@@ -202,9 +202,9 @@ __LOAD_SECOND_STAGE_SECTS__:
     	cmp 	dx, 0x0FF0
     	mov 	WORD [numNextCluster], dx						;dx has next cluster number
     	jnz 	__LOAD_SECOND_STAGE_SECTS__
-    
-    	mov 	si, msgBootComplete
-    	call 	__PrintMessage_
+
+;    	mov 	si, msgBootComplete
+;    	call 	__PrintMessage_
     
     	push 	WORD 0x0050								;CS for second stage
     	push 	WORD 0x0000								;IP for second stage
