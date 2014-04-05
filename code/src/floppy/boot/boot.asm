@@ -35,7 +35,7 @@ __VARIABLES_DECL__:
 	msgBootStarting  		DB 0x0D, 0x0A, "**************************", 0x0D, 0x0A, 0x0D, 0x0A, "Booting Cygnus OS...", 0x0D, 0x0A, 0x00
 	msgFailure 	 		DB "Error in loading the operating system...", 0x0D, 0x0A, 0x00
 	msgBootComplete	 		DB "Boot finished.", 0x0D, 0x0A, 0x00
-	nameSecondStage  		DB "INITKRNLBIN"
+	nameSecondStage  		DB "LOADKRNLBIN"
 	numNextCluster 	 		DW 0
 	addrBufStart	 		DW 0x0200
 	addrDataRegion 	 		DW 0
