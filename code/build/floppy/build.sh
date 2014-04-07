@@ -1,30 +1,68 @@
 #!/bin/bash
 
-if [ -f ~/OS/floppy/floppy.img ]
+CURDIR=`pwd`
+
+IFS='/' read -a CURDIR_DIR_ARRAY <<< "$CURDIR"
+CURDIR_DIR_DEPTH=`expr ${#CURDIR_DIR_ARRAY[@]} - 1`
+TARGET_NAME=${CURDIR_DIR_ARRAY[$CURDIR_DIR_DEPTH]}
+
+IMAGES_HOME=$CURDIR/../../../images/
+OUTPUT_HOME=${IMAGES_HOME}/${TARGET_NAME}
+IMAGE_NAME=floppy.img
+
+SRC_HOME=$CURDIR/../../src/
+TARGET_SRC_HOME=${SRC_HOME}/${TARGET_NAME}
+
+BOOT_DIR_NAME=boot
+BOOT_PATH=${TARGET_SRC_HOME}/${BOOT_DIR_NAME}
+BOOT_BIN=boot.bin
+BOOT_BIN_PATH=${BOOT_PATH}/${BOOT_BIN}
+LOADKRNL_BIN=LOADKRNL.BIN
+LOADKRNL_BIN_PATH=${BOOT_PATH}/${LOADKRNL_BIN}
+
+
+KERNEL_DIR_NAME=kernel
+KERNEL_PATH=${TARGET_SRC_HOME}/${KERNEL_DIR_NAME}
+KRNLINIT_BIN=KRNLINIT.BIN
+KRNLINIT_BIN_PATH=${KERNEL_PATH}/${KRNLINIT_BIN}
+
+LOOP_DEVICE=/dev/loop0
+MOUNT_POINT=/media/${TARGET_NAME}
+FSTYPE=vfat
+
+cd ${BOOT_PATH}
+
+nasm -f bin 	  boot.asm -o ${BOOT_BIN}
+nasm -f bin   loadkrnl.asm -o ${LOADKRNL_BIN}
+
+cd ${KERNEL_PATH}
+
+nasm -f bin kernelinit.asm -o ${KRNLINIT_BIN}
+
+if [ ! -d ${IMAGES_HOME} ]
 then
-	rm ~/OS/floppy/floppy.img
+	mkdir ${IMAGES_HOME}
 fi
-mkfs.vfat -C ~/OS/floppy/floppy.img 1440
 
-curdir=$PWD
-cd ~/OS/bootloader/
-nasm boot.asm -o boot.bin
-dd if=boot.bin of=~/OS/floppy/floppy.img bs=512 conv=notrunc
-nasm -f bin initkrnl.asm -o INITKRNL.BIN
-cd ~/OS/kernel/
-nasm kernelmain.asm -o KERNEL.BIN
-cd $curdir
+if [ ! -d ${OUTPUT_HOME} ]
+then
+	mkdir ${OUTPUT_HOME}
+fi
 
-losetup /dev/loop0 ~/OS/floppy/floppy.img
-mount -t vfat -o loop /dev/loop0 /media/floppy
-cp ~/OS/bootloader/INITKRNL.BIN /media/floppy
-cp ~/OS/kernel/KERNEL.BIN /media/floppy/
+cd ${OUTPUT_HOME}
+
+if [ -f ${IMAGE_NAME} ]
+then
+	rm ${IMAGE_NAME}
+fi
+mkfs.vfat -C ${IMAGE_NAME} 1440
+
+dd if=${BOOT_BIN_PATH} of=${IMAGE_NAME} bs=512 conv=notrunc
+
+losetup ${LOOP_DEVICE} ${IMAGE_NAME}
+mount -t ${FSTYPE} -o loop ${LOOP_DEVICE} ${MOUNT_POINT}
+cp ${LOADKRNL_BIN_PATH} ${MOUNT_POINT}
+cp ${KRNLINIT_BIN_PATH} ${MOUNT_POINT}
 sleep 1
-umount /media/floppy
-losetup -d /dev/loop0
-
-if [ "$1" = "start" ]
-then
-	qemu -fda ~/OS/floppy/floppy.img
-fi
-
+umount ${MOUNT_POINT}
+losetup -d ${LOOP_DEVICE}
