@@ -6,38 +6,62 @@ IFS='/' read -a CURDIR_DIR_ARRAY <<< "$CURDIR"
 CURDIR_DIR_DEPTH=`expr ${#CURDIR_DIR_ARRAY[@]} - 1`
 TARGET_NAME=${CURDIR_DIR_ARRAY[$CURDIR_DIR_DEPTH]}
 
-IMAGES_HOME=$CURDIR/../../../images/
+IMAGES_HOME=$CURDIR/../../../images
 OUTPUT_HOME=${IMAGES_HOME}/${TARGET_NAME}
 IMAGE_NAME=floppy.img
 
-SRC_HOME=$CURDIR/../../src/
+
+
+SRC_HOME=$CURDIR/../../src
 TARGET_SRC_HOME=${SRC_HOME}/${TARGET_NAME}
 
-BOOT_DIR_NAME=boot
-BOOT_PATH=${TARGET_SRC_HOME}/${BOOT_DIR_NAME}
-BOOT_BIN=boot.bin
-BOOT_BIN_PATH=${BOOT_PATH}/${BOOT_BIN}
-LOADKRNL_BIN=LOADKRNL.BIN
-LOADKRNL_BIN_PATH=${BOOT_PATH}/${LOADKRNL_BIN}
 
+BOOT_DIR_NAME=boot
+BOOT_SRC_PATH=${TARGET_SRC_HOME}/${BOOT_DIR_NAME}
+
+BOOT_BIN=boot.bin
+BOOT_BIN_PATH=${OUTPUT_HOME}/${BOOT_DIR_NAME}/${BOOT_BIN}
+LOADKRNL_BIN=LOADKRNL.BIN
+LOADKRNL_BIN_PATH=${OUTPUT_HOME}/${BOOT_DIR_NAME}/${LOADKRNL_BIN}
 
 KERNEL_DIR_NAME=kernel
-KERNEL_PATH=${TARGET_SRC_HOME}/${KERNEL_DIR_NAME}
+KERNEL_SRC_PATH=${TARGET_SRC_HOME}/${KERNEL_DIR_NAME}
+
 KRNLINIT_BIN=KRNLINIT.BIN
-KRNLINIT_BIN_PATH=${KERNEL_PATH}/${KRNLINIT_BIN}
+KRNLINIT_BIN_PATH=${OUTPUT_HOME}/${KERNEL_DIR_NAME}/${KRNLINIT_BIN}
+
+
 
 LOOP_DEVICE=/dev/loop0
 MOUNT_POINT=/media/${TARGET_NAME}
 FSTYPE=vfat
 
-cd ${BOOT_PATH}
 
-nasm -f bin 	  boot.asm -o ${BOOT_BIN}
-nasm -f bin   loadkrnl.asm -o ${LOADKRNL_BIN}
 
-cd ${KERNEL_PATH}
+cd ${OUTPUT_HOME}
 
-nasm -f bin kernelinit.asm -o ${KRNLINIT_BIN}
+if [ ! -d ${BOOT_DIR_NAME} ]
+then
+	mkdir ${BOOT_DIR_NAME}
+else
+	rm -rf ${BOOT_DIR_NAME}/*
+fi
+
+if [ ! -d ${KERNEL_DIR_NAME} ]
+then
+	mkdir ${KERNEL_DIR_NAME}
+else
+	rm -rf ${KERNEL_DIR_NAME}/*
+fi
+
+
+cd ${BOOT_SRC_PATH}
+nasm -f bin 	  boot.asm -o ${BOOT_BIN_PATH}
+nasm -f bin   loadkrnl.asm -o ${LOADKRNL_BIN_PATH}
+
+cd ${KERNEL_SRC_PATH}
+nasm -f bin kernelinit.asm -o ${KRNLINIT_BIN_PATH}
+
 
 if [ ! -d ${IMAGES_HOME} ]
 then
@@ -57,12 +81,15 @@ then
 fi
 mkfs.vfat -C ${IMAGE_NAME} 1440
 
+
 dd if=${BOOT_BIN_PATH} of=${IMAGE_NAME} bs=512 conv=notrunc
 
 losetup ${LOOP_DEVICE} ${IMAGE_NAME}
 mount -t ${FSTYPE} -o loop ${LOOP_DEVICE} ${MOUNT_POINT}
+
 cp ${LOADKRNL_BIN_PATH} ${MOUNT_POINT}
 cp ${KRNLINIT_BIN_PATH} ${MOUNT_POINT}
+
 sleep 1
 umount ${MOUNT_POINT}
 losetup -d ${LOOP_DEVICE}
