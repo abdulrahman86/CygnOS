@@ -67,8 +67,8 @@ cd ${BOOT_SRC_PATH}
 nasm -f bin 	  boot.asm -o ${BOOT_BIN_PATH}
 nasm -f bin   loadkrnl.asm -o ${LOADKRNL_BIN_PATH}
 
-#cd ${KERNEL_SRC_PATH}
-#nasm -f bin kernelinit.asm -o ${KRNLINIT_BIN_PATH}
+cd ${KERNEL_SRC_PATH}
+nasm -f bin kernelinit.asm -o ${KRNLINIT_BIN_PATH}
 
 cd ${OUTPUT_HOME}
 
