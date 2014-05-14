@@ -85,8 +85,7 @@ losetup ${LOOP_DEVICE} ${IMAGE_NAME}
 mount -t ${FSTYPE} -o loop ${LOOP_DEVICE} ${MOUNT_POINT}
 
 cp ${LOADKRNL_BIN_PATH} ${MOUNT_POINT}
-#cp ${KRNLINIT_BIN_PATH} ${MOUNT_POINT}
-cp ~/OS/code/floppy/src/kernel/KERNEL.BIN ${MOUNT_POINT}
+cp ${KRNLINIT_BIN_PATH} ${MOUNT_POINT}
 
 sleep 1
 umount ${MOUNT_POINT}
