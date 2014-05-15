@@ -114,9 +114,10 @@ Questions:
 + Multiple BITS directives in one file						http://forum.osdev.org/viewtopic.php?f=1&t=27761
 + Graphics mode used by BIOS								http://stackoverflow.com/questions/21954034/graphics-mode-used-by-bios
 - Relocation
-- Why does ABI depend on CPU
-- Reset vector for 386+ (from wikipedia)
-- What is C runtime
++ Why does ABI depend on CPU								http://www.evernote.com/shard/s212/sh/407cc382-5194-4b54-ae26-4f4702a6c37c/ecd682b038c52c9f66ea2731e50e5d23
+- Reset vector for 386+ (from wikipedia)					
++ What is C runtime											http://stackoverflow.com/questions/23427066/what-are-the-functions-of-and-what-is-included-in-the-c-runtime
++ Why standard libs are not included in cross compiler		http://www.evernote.com/shard/s212/sh/0de183d9-e948-42ba-9717-8c17120148fd/81f4898e3da2b8cfdc17f96161afb263
 
 Useful links:
 * http://stackoverflow.com/questions/5794991/why-cant-i-call-bios-interrupts-from-protected-mode
@@ -125,3 +126,4 @@ Useful links:
 * http://stackoverflow.com/questions/1051939/what-information-does-bios-load-into-ram
 * http://stackoverflow.com/questions/5300527/do-normal-x86-or-amd-pcs-run-startup-bios-code-directly-from-rom-or-do-they-cop/5347759#5347759
 * http://stackoverflow.com/questions/1433204/how-do-i-share-a-variable-between-source-files-in-c-with-extern-but-how
+* http://www.evernote.com/shard/s212/sh/b0b6246c-34c3-4c4f-8773-d0c58224582b/0f86ed6686a6f188e621f09557b73abf [loading shared libraries]
