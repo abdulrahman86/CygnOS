@@ -74,5 +74,5 @@ GLOBAL		_i686_gdt_install
 EXTERN		gdtr_default
 
 _i686_gdt_install:
-	lgdt	gdtr_default
+	lgdt	[gdtr_default]
 	ret
