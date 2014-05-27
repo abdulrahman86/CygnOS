@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdint.h>
+#include <gdt.h>
 
 static const size_t width_vga  = 80;
 static const size_t height_vga = 25;
@@ -58,7 +59,7 @@ void clear_screen_vga()
 {
 	uint16_t vga_screen_char;
 	uint8_t char_ascii_blank = 0x20;
-    uint8_t char_attrib = 0x0F;	
+	uint8_t char_attrib = 0x0F;	
 	
 	uint16_t vga_entry = 0;
 	vga_entry = (vga_entry | char_attrib) << 8;
