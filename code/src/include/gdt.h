@@ -7,33 +7,33 @@
 
 #define	I686_GDT_ACCESS			0x1
 
-#define	I686_GDT_RE			0x0
-#define	I686_GDT_RW_RE			0x0002
+#define	I686_GDT_SEGMENT_RE		0x0
+#define	I686_GDT_SEGMENT_RW_RE		0x0002
 
-#define	I686_GDT_CONFORMING		0x0
-#define	I686_GDT_EXPNSN_DIR		0x0004
+#define	I686_GDT_SEGMENT_CONFORMING	0x0
+#define	I686_GDT_SEGMENT_EXPNSN_DIR	0x0004
 
-#define	I686_GDT_DATA_SEG		0x0
-#define	I686_GDT_CODE_SEG		0x0008
+#define	I686_GDT_SEGMENT_DATA		0x0
+#define	I686_GDT_SEGMENT_CODE		0x0008
 
-#define	I686_GDT_SYSTEM_DESCR		0x0
-#define	I686_GDT_CODE_DATA_DESCR	0x0010
+#define	I686_GDT_DESCRIPTOR_SYSTEM	0x0
+#define	I686_GDT_DESCRIPTOR_CODE_DATA	0x0010
 
 #define	I686_GDT_RING_0			0x0
 #define	I686_GDT_RING_3			0x0060
 
-#define	I686_GDT_VM_SEGMENT		0x0
-#define	I686_GDT_MEM_SEGMENT		0x0080
+#define	I686_GDT_SEGMENT_VM		0x0
+#define	I686_GDT_SEGMENT_MEMORY		0x0080
 
 #define	I686_GDT_RESERVED		0x0
 
 #define	I686_GDT_OS_RESERVED		0x0
 
-#define	I686_GDT_16_BIT_SEG		0x0
-#define	I686_GDT_32_BIT_SEG		0x4000
+#define	I686_GDT_SEGMENT_16		0x0
+#define	I686_GDT_SEGMENT_32		0x4000
 
-#define	I686_GDT_1B_GRAN		0x0
-#define	I686_GDT_4K_GRAN		0x8000
+#define	I686_GDT_GRANULARITY_1B		0x0
+#define	I686_GDT_GRANULARITY_4K		0x8000
 
 typedef struct
 {
@@ -52,7 +52,7 @@ typedef struct
 	uint8_t		base_high;	
 } i686_gdt_descriptor;
 
-typedef struct
+typedef struct __attribute__((packed))
 {
 	//size of the GDT - 1
 	uint16_t	gdt_limit;
@@ -60,9 +60,6 @@ typedef struct
 	//base address of the GDT
 	uintptr_t	gdt_base;
 } i686_gdtr_data;
-
-//3-descriptor GDT, which is the default one
-i686_gdt_descriptor gdt_default[DEFAULT_GDT_MAX_DESCRIPTORS];
 
 //structure instance holding GDTR data for the default GDT
 i686_gdtr_data gdtr_default;
