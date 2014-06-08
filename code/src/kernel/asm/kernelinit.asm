@@ -76,3 +76,10 @@ EXTERN		gdtr_default
 _i686_gdt_install:
 	lgdt	[gdtr_default]
 	ret
+	
+GLOBAL		_i686_idt_install
+EXTERN		idtr_cur
+
+_i686_idt_install:
+	lidt	[idtr_cur]
+	ret
