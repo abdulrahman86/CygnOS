@@ -67,6 +67,6 @@ i686_gdtr_data gdtr_default;
 //set up and install the default GDT
 void gdt_set_default();
 
-//actually loads data into GDTR, implemented in assembly
+//load the GDTR
 extern void _i686_gdt_install();
 #endif

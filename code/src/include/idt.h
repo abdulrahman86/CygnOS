@@ -1,8 +1,9 @@
 #ifndef __IDT_HEADER
 #define __IDT_HEADER
 
-#include <stdint.h>
 #include <io.h>
+#include <stdint.h>
+#include <pic_common.h>
 
 #define	IDT_MAX_DESCRIPTORS			256
 
@@ -49,10 +50,19 @@ typedef struct __attribute__((packed))
 	uint32_t	idt_base;
 } i686_idtr_data;
 
+//struct representing contents to be loaded in IDTR
 i686_idtr_data	idtr;
 
-extern void _i686_idt_install();
-
+//install one descriptor in the IDT
 uint8_t set_i686_idt_descriptor(uint8_t, uint16_t, uint8_t);
+//send the EOI command to the master/slave PIC(s)
+void send_eoi_pic(uint8_t);
+
+//load the IDTR
+extern void _i686_idt_install();
+//enable interrupts
+extern void _i686_enable_interrupts();
+//disable interrupts
+extern void _i686_disable_interrupts();
 
 #endif
