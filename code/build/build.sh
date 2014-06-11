@@ -53,10 +53,12 @@ else
 fi
 
 cd ${KRNL_SRC_PATH}
-nasm 		-felf  	 ${KRNL_ASM_SRC_PATH}/kernelinit.asm 	-o ${KRNL_ASM_OUT_PATH}/kernelinit_s.o
-i686-elf-gcc 	-c 	 kernelinit.c 							-o ${KRNL_OUT_PATH}/kernelinit.o		   	-std=gnu99     -ffreestanding -Wall 	-Wextra	-I${SRC_HOME}/include
+nasm 		-felf  	 ${KRNL_ASM_SRC_PATH}/kernel.asm 		-o ${KRNL_ASM_OUT_PATH}/kernel_s.o
+i686-elf-gcc 	-c 	 kernel.c 								-o ${KRNL_OUT_PATH}/kernel.o		   	-std=gnu99     -ffreestanding -Wall 	-Wextra	-I${SRC_HOME}/include
 i686-elf-gcc	-c	 gdt.c									-o ${KRNL_OUT_PATH}/gdt.o					-std=gnu99	   -ffreestanding -Wall		-Wextra	-I${SRC_HOME}/include
-i686-elf-gcc 	-T 	 ${KRNL_LD_SRC_PATH}/kernelinit.ld 		-o ${BUILD_OUTPUT_HOME}/kernelinit.bin	 	-ffreestanding -O2 	      -nostdlib ${KRNL_ASM_OUT_PATH}/kernelinit_s.o ${KRNL_OUT_PATH}/kernelinit.o	${KRNL_OUT_PATH}/gdt.o	-lgcc
+i686-elf-gcc	-c	 idt.c									-o ${KRNL_OUT_PATH}/idt.o					-std=gnu99	   -ffreestanding -Wall		-Wextra	-I${SRC_HOME}/include
+i686-elf-gcc	-c	 screen_vga.c							-o ${KRNL_OUT_PATH}/screen_vga.o					-std=gnu99	   -ffreestanding -Wall		-Wextra	-I${SRC_HOME}/include
+i686-elf-gcc 	-T 	 ${KRNL_LD_SRC_PATH}/kernel.ld	 		-o ${BUILD_OUTPUT_HOME}/kernel.bin		 	-ffreestanding -O2 	      -nostdlib ${KRNL_ASM_OUT_PATH}/kernel_s.o ${KRNL_OUT_PATH}/kernel.o	${KRNL_OUT_PATH}/screen_vga.o	${KRNL_OUT_PATH}/idt.o	${KRNL_OUT_PATH}/gdt.o	-lgcc
 
 
 cd ${IMAGES_HOME}
@@ -65,7 +67,7 @@ mkdir 	-p 	isodir
 mkdir 	-p 	isodir/boot
 mkdir 	-p 	isodir/boot/grub
 
-cp 		${BUILD_OUTPUT_HOME}/kernelinit.bin 	isodir/boot/cygnusos.bin
+cp 		${BUILD_OUTPUT_HOME}/kernel.bin		 	isodir/boot/cygnusos.bin
 cp 		${SRC_HOME}/${BOOT_DIR_NAME}/grub.cfg 	isodir/boot/grub/grub.cfg
 
 grub-mkrescue 	-o 	${OS_ISO_NAME} 	isodir
