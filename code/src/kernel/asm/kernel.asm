@@ -78,8 +78,20 @@ _i686_gdt_install:
 	ret
 	
 GLOBAL		_i686_idt_install
-EXTERN		idtr_cur
+EXTERN		idtr
 
 _i686_idt_install:
-	lidt	[idtr_cur]
+	lidt	[idtr]
+	ret
+
+GLOBAL		_i686_enable_interrupts
+
+_i686_enable_interrupts:
+	sti
+	ret
+	
+GLOBAL		_i686_disable_interrupts
+
+_i686_disable_interrupts:
+	cli
 	ret

@@ -4,6 +4,7 @@
 #include <io.h>
 #include <stdint.h>
 #include <pic_common.h>
+#include <screen_vga.h>
 
 #define	IDT_MAX_DESCRIPTORS			256
 
@@ -50,11 +51,14 @@ typedef struct __attribute__((packed))
 	uint32_t	idt_base;
 } i686_idtr_data;
 
+//typedef for pointer to an ISR
+typedef void (*I686_ISR_PTR)();
+
 //struct representing contents to be loaded in IDTR
 i686_idtr_data	idtr;
 
 //install one descriptor in the IDT
-uint8_t set_i686_idt_descriptor(uint8_t, uint16_t, uint8_t);
+void set_i686_idt_descriptor(uint8_t, I686_ISR_PTR, uint16_t, uint8_t);
 //send the EOI command to the master/slave PIC(s)
 void send_eoi_pic(uint8_t);
 
@@ -64,5 +68,8 @@ extern void _i686_idt_install();
 extern void _i686_enable_interrupts();
 //disable interrupts
 extern void _i686_disable_interrupts();
+
+//C function for handling the default ISR, called from isr.asm
+void default_isr_handler();
 
 #endif

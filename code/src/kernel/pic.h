@@ -1,9 +1,9 @@
-#include <io.h>
+#ifndef	__PIC_HEADER
+#define	__PIC_HEADER
 
-#define	PIC1_COMMAND		0x20
-#define	PIC1_DATA			0x21
-#define	PIC2_COMMAND		0xA0
-#define	PIC2_DATA			0xA1
+#include <io.h>
+#include <stdint.h>
+#include <pic_common.h>
 
 #define	ICW1_ICW4			0x1
 #define	ICW1_SNGL			0x2
@@ -39,3 +39,4 @@ void pic_remap()
 	outb(PIC2_DATA, ICW4_X86);	
 }
 
+#endif
