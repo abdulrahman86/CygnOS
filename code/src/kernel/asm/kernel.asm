@@ -65,6 +65,17 @@ _start:
 	mov	esp,	stack_top
 	
 	call	gdt_install_local
+	
+	mov	ax,		0x10
+	mov	ds,		ax
+	mov	es,		ax
+	mov	fs,		ax
+	mov	gs,		ax
+	mov	ss,		ax
+	
+	jmp	0x8:_kernel_entry
+
+_kernel_entry:
 	call 	main
 
 	cli

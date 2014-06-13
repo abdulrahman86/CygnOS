@@ -1,4 +1,5 @@
 #include <gdt.h>
+#include <idt.h>
 #include <io.h>
 #include <screen_vga.h>
 #include "pic.h"
@@ -13,6 +14,10 @@ void main()
 	print_string_vga(starred_heading);
 	print_string_vga(welcome_message);
 	print_string_vga(starred_heading);
-	
-	pic_remap();
+		
+	init_idt();	
+	setup_idt();
+
+	_i686_enable_interrupts();
+//	pic_remap();
 }

@@ -21,8 +21,13 @@ KRNL_LD_DIR_NAME=linker
 KRNL_LD_SRC_PATH=${KRNL_SRC_PATH}/${KRNL_LD_DIR_NAME}
 
 
+LIB_DIR_NAME=lib
+LIB_SRC_PATH=${SRC_HOME}/${LIB_DIR_NAME}
+
+
 KRNL_OUT_PATH=${BUILD_OUTPUT_HOME}/${KRNL_DIR_NAME}
 KRNL_ASM_OUT_PATH=${KRNL_OUT_PATH}/${KRNL_ASM_DIR_NAME}
+LIB_OUT_PATH=${BUILD_OUTPUT_HOME}/${LIB_DIR_NAME}
 OS_ISO_NAME=cygnusos.iso
 
 
@@ -52,13 +57,25 @@ else
 	rm    -rf ${KRNL_ASM_OUT_PATH}/*
 fi
 
+if [ ! -d ${LIB_OUT_PATH} ]
+then
+	mkdir ${LIB_OUT_PATH}
+else
+	rm	  -rf ${LIB_OUT_PATH}/*
+fi
+
 cd ${KRNL_SRC_PATH}
 nasm 		-felf  	 ${KRNL_ASM_SRC_PATH}/kernel.asm 		-o ${KRNL_ASM_OUT_PATH}/kernel_s.o
+nasm 		-felf  	 ${KRNL_ASM_SRC_PATH}/isr.asm	 		-o ${KRNL_ASM_OUT_PATH}/isr_s.o
 i686-elf-gcc 	-c 	 kernel.c 								-o ${KRNL_OUT_PATH}/kernel.o		   	-std=gnu99     -ffreestanding -Wall 	-Wextra	-I${SRC_HOME}/include
 i686-elf-gcc	-c	 gdt.c									-o ${KRNL_OUT_PATH}/gdt.o					-std=gnu99	   -ffreestanding -Wall		-Wextra	-I${SRC_HOME}/include
 i686-elf-gcc	-c	 idt.c									-o ${KRNL_OUT_PATH}/idt.o					-std=gnu99	   -ffreestanding -Wall		-Wextra	-I${SRC_HOME}/include
 i686-elf-gcc	-c	 screen_vga.c							-o ${KRNL_OUT_PATH}/screen_vga.o					-std=gnu99	   -ffreestanding -Wall		-Wextra	-I${SRC_HOME}/include
-i686-elf-gcc 	-T 	 ${KRNL_LD_SRC_PATH}/kernel.ld	 		-o ${BUILD_OUTPUT_HOME}/kernel.bin		 	-ffreestanding -O2 	      -nostdlib ${KRNL_ASM_OUT_PATH}/kernel_s.o ${KRNL_OUT_PATH}/kernel.o	${KRNL_OUT_PATH}/screen_vga.o	${KRNL_OUT_PATH}/idt.o	${KRNL_OUT_PATH}/gdt.o	-lgcc
+
+cd ${LIB_SRC_PATH}
+i686-elf-gcc	-c	 string.c								-o ${LIB_OUT_PATH}/string.o					-std=gnu99	   -ffreestanding -Wall		-Wextra	-I${SRC_HOME}/include
+
+i686-elf-gcc 	-T 	 ${KRNL_LD_SRC_PATH}/kernel.ld	 		-o ${BUILD_OUTPUT_HOME}/kernel.bin		 	-ffreestanding -O2 	      -nostdlib ${KRNL_ASM_OUT_PATH}/kernel_s.o ${KRNL_ASM_OUT_PATH}/isr_s.o	${KRNL_OUT_PATH}/kernel.o	${KRNL_OUT_PATH}/screen_vga.o	${KRNL_OUT_PATH}/idt.o	${KRNL_OUT_PATH}/gdt.o		${LIB_OUT_PATH}/string.o	-lgcc
 
 
 cd ${IMAGES_HOME}
