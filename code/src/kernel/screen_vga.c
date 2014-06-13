@@ -3,8 +3,8 @@
 const size_t width_vga  = 80;
 const size_t height_vga = 25;
 
-static size_t x_pos = 0;
-static size_t y_pos = 0;
+size_t x_pos = 0;
+size_t y_pos = 0;
 
 static uint16_t *video_memory = (uint16_t *)0xB8000;
 
@@ -16,15 +16,6 @@ uint16_t make_vga_entry(uint8_t char_attrib, char char_ascii)
 	vga_entry |= char_ascii;
 	
 	return vga_entry;
-}
-
-size_t strlen(char *str)
-{
-	size_t length;
-	
-	for(length = 0;str[length] != '\0';length++);
-	
-	return length;
 }
 
 void print_char_vga(char char_ascii)
