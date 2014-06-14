@@ -17,7 +17,8 @@ void main()
 		
 	init_idt();	
 	setup_idt();
-
+	
 	_i686_enable_interrupts();
-//	pic_remap();
+	
+	pic_remap();
 }

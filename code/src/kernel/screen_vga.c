@@ -1,10 +1,10 @@
 #include <screen_vga.h>
 
-const size_t width_vga  = 80;
-const size_t height_vga = 25;
+const uint8_t width_vga  = 80;
+const uint8_t height_vga = 25;
 
-size_t x_pos = 0;
-size_t y_pos = 0;
+uint8_t x_pos = 0;
+uint8_t y_pos = 0;
 
 static uint16_t *video_memory = (uint16_t *)0xB8000;
 
@@ -22,6 +22,9 @@ void print_char_vga(char char_ascii)
 {
 	uint8_t char_attrib = 0x0F;
 	
+	if(char_ascii != '\n')
+		video_memory[y_pos * width_vga + (x_pos++)] = make_vga_entry(char_attrib, char_ascii);
+	
 	if(x_pos == width_vga || char_ascii == '\n')
 	{
 		x_pos=0;
@@ -29,11 +32,7 @@ void print_char_vga(char char_ascii)
 			y_pos = 0;
 	}
 	
-	if(char_ascii != '\n')
-	{
-		video_memory[y_pos * width_vga + x_pos] = make_vga_entry(char_attrib, char_ascii);
-		x_pos++;
-	}
+	update_cursor();
 }
 
 void print_string_vga(char *message)
@@ -61,4 +60,19 @@ void clear_screen_vga()
 	
 	x_pos = 0;
 	y_pos = 0;
+	
+	update_cursor();
+}
+
+void update_cursor()
+{
+	uint16_t video_mem_index;
+	
+	video_mem_index = y_pos * width_vga + x_pos;
+
+	outb(PORT_CURSOR_INDEX, CURSOR_HIGH_INDEX);	
+	outb(PORT_CURSOR_DATA, (video_mem_index >> 8) & 0xFF);
+
+	outb(PORT_CURSOR_INDEX, CURSOR_LOW_INDEX);		
+	outb(PORT_CURSOR_DATA, video_mem_index & 0xFF);
 }
