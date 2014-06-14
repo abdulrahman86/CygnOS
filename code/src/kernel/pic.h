@@ -20,23 +20,23 @@
 void pic_remap()
 {
 	//master PIC - x86 mode, ICW4 will be used
-	outb(PIC1_COMMAND, ICW1_INIT | ICW1_ICW4);
+	outb(PORT_PIC1_COMMAND, ICW1_INIT | ICW1_ICW4);
 	//slave PIC - x86 mode, ICW4 will be used
-	outb(PIC2_COMMAND, ICW1_INIT | ICW1_ICW4);	
+	outb(PORT_PIC2_COMMAND, ICW1_INIT | ICW1_ICW4);	
 	
 	//master PIC - use interrupt vectors 0x20 - 0x28
-	outb(PIC1_DATA, 0x20);
+	outb(PORT_PIC1_DATA, 0x20);
 	//slave PIC - use interrupt vectors 0x29 - 0x2F
-	outb(PIC2_DATA, 0x28);
+	outb(PORT_PIC2_DATA, 0x28);
 	
 	//master PIC connected to slave PIC via IRQ 2 line
-	outb(PIC1_DATA, 0x4);
-	outb(PIC2_DATA, 0x2);
+	outb(PORT_PIC1_DATA, 0x4);
+	outb(PORT_PIC2_DATA, 0x2);
 	
 	//master ICW4 - x86 mode
-	outb(PIC1_DATA, ICW4_X86);
+	outb(PORT_PIC1_DATA, ICW4_X86);
 	//slave ICW4 - x86 mode
-	outb(PIC2_DATA, ICW4_X86);	
+	outb(PORT_PIC2_DATA, ICW4_X86);	
 }
 
 #endif

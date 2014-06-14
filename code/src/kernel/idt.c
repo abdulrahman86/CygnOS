@@ -24,9 +24,9 @@ void set_i686_idt_descriptor(uint8_t __interrupt_index, I686_ISR_PTR __isr_base,
 void send_eoi_pic(uint8_t __irq)
 {
 	if(__irq >= 8)
-		outb(PIC2_COMMAND, PIC_EOI);
+		outb(PORT_PIC2_COMMAND, PIC_EOI);
 	
-	outb(PIC1_COMMAND, PIC_EOI);
+	outb(PORT_PIC1_COMMAND, PIC_EOI);
 }
 
 void default_isr_handler()
