@@ -1,4 +1,7 @@
 #include <screen_vga.h>
+#include <stddef.h>
+#include <string.h>
+#include <io.h>
 
 const uint8_t width_vga  = 80;
 const uint8_t height_vga = 25;

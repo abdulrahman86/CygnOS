@@ -1,10 +1,7 @@
 #ifndef	__SCREEN_VGA_HEADER
 #define	__SCREEN_VGA_HEADER
 
-#include <io.h>
 #include <stdint.h>
-#include <stddef.h>
-#include <string.h>
 
 #define	PORT_CURSOR_INDEX	0x03D4
 #define	CURSOR_HIGH_INDEX	0x0E
