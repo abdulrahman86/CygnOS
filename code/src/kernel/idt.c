@@ -42,17 +42,43 @@ void send_eoi_pic(uint8_t __irq)
 	outb(PORT_PIC1_COMMAND, PIC_EOI);
 }
 
+int check_spurious_irq(uint32_t __int_no)
+{
+	if(__int_no == 7)
+	{
+		outb(PORT_PIC1_COMMAND, 0x0B);
+		uint8_t isr = inb(PORT_PIC1_COMMAND);
+		if(!(isr & 0x80))
+			return 1;
+	}
+	else if(__int_no == 15)
+	{
+		outb(PORT_PIC2_COMMAND, 0x0B);
+		uint8_t isr = inb(PORT_PIC2_COMMAND);
+		if(!(isr & 0x80))
+		{
+			outb(PORT_PIC1_COMMAND, PIC_EOI);
+			return 1;
+		}
+	}
+	
+	return 0;
+}
+
 void common_interrupt_handler(i686_regs __regs)
 {
 	uint32_t int_no = __regs.interrupt_no;	
-
-	if(int_no >=32 && int_no <= 47)
-		send_eoi_pic(int_no - 32);
-
-	if(interrupt_handlers[int_no] != 0)
+	
+	if(!((int_no == 7 || int_no == 15) && check_spurious_irq(int_no)))
 	{
-		isr_ptr int_handler = interrupt_handlers[int_no];
-		int_handler(__regs);
+		if(int_no >=32 && int_no <= 47)
+			send_eoi_pic(int_no - 32);
+
+		if(interrupt_handlers[int_no] != 0)
+		{
+			isr_ptr int_handler = interrupt_handlers[int_no];
+			int_handler(__regs);
+		}
 	}
 }
 

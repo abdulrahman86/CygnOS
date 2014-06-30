@@ -10,7 +10,7 @@ static uint16_t get_count_from_frequency(uint16_t __frequency)
 
 void pit_callback(i686_regs __regs)
 {
-	print_char_vga('a');
+
 }
 
 void pit_write(uint8_t __pit_channel, uint16_t __frequency)
