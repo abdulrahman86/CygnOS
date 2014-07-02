@@ -25,6 +25,8 @@ extern uint16_t make_vga_entry(uint8_t, char);
 extern void print_char_vga(char);
 //display a string on the VGA screen
 extern void print_string_vga(char *);
+//display a string on the last line of the VGA screen
+extern void print_last_line(char *);
 //clear the VGA screen
 extern void clear_screen_vga();
 //update position of the screen cursor
