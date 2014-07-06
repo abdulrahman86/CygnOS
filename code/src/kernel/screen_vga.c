@@ -48,18 +48,12 @@ void print_string_vga(char *__message)
 
 void print_last_line(char *__message)
 {
-	uint8_t x_pos_current = x_pos, y_pos_current = y_pos;
+	uint8_t x_pos_last_line = 0, y_pos_last_line = height_vga - 1;
 	uint8_t char_attrib = 0x0F;
 	size_t last_line_char;
 	
-	x_pos = 0;
-	y_pos = height_vga - 1;
-	
 	for(last_line_char = 0;last_line_char < strlen(__message);last_line_char++)
-		video_memory[y_pos * width_vga + (x_pos++)] = make_vga_entry(char_attrib, __message[last_line_char]);
-	
-	x_pos = x_pos_current;
-	y_pos = y_pos_current;
+		video_memory[y_pos_last_line * width_vga + (x_pos_last_line++)] = make_vga_entry(char_attrib, __message[last_line_char]);
 }
 
 void clear_screen_vga()
