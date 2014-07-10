@@ -49,8 +49,10 @@ void main()
 	init_idt();
 	setup_idt();
 
-	pic_remap();	
-
+	pic_remap();
+	
+	init_time_msg_line();
+	
 	register_interrupt_handler(32, &pit_callback);
 	pit_write(0, PIT_FREQ_HZ);	
 		

@@ -10,9 +10,9 @@
 #define	PORT_CURSOR_DATA	0x03D5
 
 //width of VGA display
-extern const uint8_t width_vga;
+#define	WIDTH_VGA			80
 //height of VGA display
-extern const uint8_t height_vga;
+#define	HEIGHT_VGA			25
 
 //X co-ordinate of next character to be printed
 extern uint8_t x_pos;
