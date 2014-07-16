@@ -83,6 +83,8 @@ void pit_callback(i686_regs __regs)
 	
 	if(cur_intr_millis == 100)
 	{
+		tick++;
+	
 		uptime_seconds++;
 		update_screen_time();
 		

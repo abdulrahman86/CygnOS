@@ -120,13 +120,13 @@ void main()
 	setup_idt();
 
 	pic_remap();
-	
-	rtc_init_time = get_rtc_time();
-	
-	init_time_msg_line();
-	
+		
 	register_interrupt_handler(32, &pit_callback);
 	pit_write(0, PIT_FREQ_HZ);	
+
+	rtc_init_time = get_rtc_time();	
+	init_time_msg_line();
+	tick = 0;
 		
 	_i686_enable_interrupts();
 	

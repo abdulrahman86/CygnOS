@@ -12,6 +12,9 @@
 #define	PORT_PIT_CHANNEL_1		0x41
 #define	PORT_PIT_CHANNEL_2		0x42
 
+//stores number of seconds since epoch
+uint32_t tick;
+
 //instance which will hold the time values retrieved from RTC during boot
 timespec rtc_init_time;
 
