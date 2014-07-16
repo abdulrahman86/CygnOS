@@ -5,14 +5,6 @@
 
 #define	IO_WAIT_COUNTER		1000
 
-//wait to let the I/O operation complete
-/*static void io_wait()
-{
-	unsigned int wait_counter;
-	
-	for(wait_counter = 0;wait_counter < IO_WAIT_COUNTER;wait_counter++);
-}*/
-
 //read one byte from port number "__port"
 static __inline uint8_t inb(uint16_t __port)
 {
