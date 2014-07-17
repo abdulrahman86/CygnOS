@@ -7,6 +7,8 @@
 #include <time.h>
 #include <screen_vga.h>
 
+#define	ISLEAP(year)	(((year%4 == 0 && year%100 != 0) || (year%400 == 0))?1:0)
+
 static void pic_remap()
 {
 	//master PIC - x86 mode, ICW4 will be used
@@ -100,6 +102,27 @@ static timespec get_rtc_time()
 	return rtc_time;
 }
 
+static uint32_t get_init_seconds_since_epoch()
+{
+	uint32_t epoch_seconds = 0;
+	uint32_t l_index;
+	
+	uint8_t month_days[2][12] = {{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}, {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}};
+	
+	for(l_index = 1970;l_index < rtc_init_time.year; l_index++)
+		epoch_seconds += (ISLEAP(l_index)?366:365)*24*60*60;
+	
+	for(l_index = 1;l_index < rtc_init_time.month; l_index++)
+		epoch_seconds += month_days[ISLEAP(rtc_init_time.year)][l_index-1]*24*60*60;
+	
+	epoch_seconds += (rtc_init_time.day-1)*24*60*60;
+	epoch_seconds += rtc_init_time.hour*60*60;
+	epoch_seconds += rtc_init_time.minute*60;
+	epoch_seconds += rtc_init_time.second;
+	
+	return epoch_seconds;
+}
+
 void kernel_infinite_loop()
 {
 	for(;;);
@@ -124,9 +147,9 @@ void main()
 	register_interrupt_handler(32, &pit_callback);
 	pit_write(0, PIT_FREQ_HZ);	
 
-	rtc_init_time = get_rtc_time();	
+	rtc_init_time = get_rtc_time();
+	tick = get_init_seconds_since_epoch();
 	init_time_msg_line();
-	tick = 0;
 		
 	_i686_enable_interrupts();
 	
