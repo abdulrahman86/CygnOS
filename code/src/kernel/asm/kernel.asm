@@ -76,6 +76,7 @@ _start:
 	jmp	0x8:_kernel_entry
 
 _kernel_entry:
+	push	ebx
 	call 	main
 
 	cli
