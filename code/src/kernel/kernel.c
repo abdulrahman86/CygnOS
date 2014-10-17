@@ -5,9 +5,13 @@
 #include <pic.h>
 #include <cmos.h>
 #include <time.h>
+#include <pmm.h>
+#include <string.h>
+#include <multiboot.h>
 #include <screen_vga.h>
 
 #define	ISLEAP(year)	(((year%4 == 0 && year%100 != 0) || (year%400 == 0))?1:0)
+#define	CHECK_FLAGS_BIT(flags, bitnum)	(flags && (1<<bitnum))
 
 static void pic_remap()
 {
@@ -102,6 +106,28 @@ static timespec get_rtc_time()
 	return rtc_time;
 }
 
+static void get_and_display_mmap(multiboot_info_t *mb_info)
+{
+	uint32_t mmap_addr = mb_info->mmap_addr;
+	uint32_t mmap_length = mb_info->mmap_length;
+	char *total_regions_usable_message = "\n                           Total region(s) usable                               ";
+	
+	multiboot_memory_map_t cur_map;	
+	uint32_t mmap_addr_buf = mmap_addr, regions_usable = 0;
+
+	while(mmap_addr_buf != (mmap_addr + mmap_length))
+	{
+		cur_map = *((multiboot_memory_map_t *)mmap_addr_buf);
+		if(cur_map.type == 1)
+			regions_usable++;
+	
+		mmap_addr_buf += cur_map.size + sizeof(uint32_t);
+	}
+	
+	if(!insert_uint_in_str(total_regions_usable_message, 53 /**52 + 1 for the newlines*/, regions_usable))
+		print_string_vga(total_regions_usable_message);
+}
+
 static uint32_t get_init_seconds_since_epoch()
 {
 	uint32_t epoch_seconds = 0;
@@ -128,16 +154,28 @@ void kernel_infinite_loop()
 	for(;;);
 }
 
-void main()
+void main(multiboot_info_t *mb_info)
 {
 	char *starred_heading = "\n\n                    ****************************************                    ";
 	char *welcome_message = "\n\n                              Welcome to Cygnus OS                              ";
+	char *memory_total_message = "\n\n                          Total system memory:      MB                          ";
+
+	uint32_t memory_total = 0;
 
 	clear_screen_vga();
 	
 	print_string_vga(starred_heading);
 	print_string_vga(welcome_message);
 	print_string_vga(starred_heading);
+	
+	if(CHECK_FLAGS_BIT(mb_info->flags, 0))
+		memory_total = mb_info->mem_upper + 1024;
+		
+	if(!insert_uint_in_str(memory_total_message, 53 /*51 + 2 newlines*/, memory_total/1024))
+		print_string_vga(memory_total_message);
+	
+	rtc_init_time = get_rtc_time();
+	tick = get_init_seconds_since_epoch();
 	
 	init_idt();
 	setup_idt();
@@ -146,12 +184,11 @@ void main()
 		
 	register_interrupt_handler(32, &pit_callback);
 	pit_write(0, PIT_FREQ_HZ);	
-
-	rtc_init_time = get_rtc_time();
-	tick = get_init_seconds_since_epoch();
-	init_time_msg_line();
 		
 	_i686_enable_interrupts();
+	
+	if(CHECK_FLAGS_BIT(mb_info->flags, 6))
+		get_and_display_mmap(mb_info);
 	
 	kernel_infinite_loop();
 }
