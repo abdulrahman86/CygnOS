@@ -160,20 +160,14 @@ void main(multiboot_info_t *mb_info)
 	char *welcome_message = "\n\n                              Welcome to Cygnus OS                              ";
 	char *memory_total_message = "\n\n                          Total system memory:      MB                          ";
 
-	uint32_t memory_total = 0;
+	uint64_t memory_total = 0;
 
 	clear_screen_vga();
 	
 	print_string_vga(starred_heading);
 	print_string_vga(welcome_message);
 	print_string_vga(starred_heading);
-	
-	if(CHECK_FLAGS_BIT(mb_info->flags, 0))
-		memory_total = mb_info->mem_upper + 1024;
 		
-	if(!insert_uint_in_str(memory_total_message, 53 /*51 + 2 newlines*/, memory_total/1024))
-		print_string_vga(memory_total_message);
-	
 	rtc_init_time = get_rtc_time();
 	tick = get_init_seconds_since_epoch();
 	
@@ -184,11 +178,18 @@ void main(multiboot_info_t *mb_info)
 		
 	register_interrupt_handler(32, &pit_callback);
 	pit_write(0, PIT_FREQ_HZ);	
+
+	if(CHECK_FLAGS_BIT(mb_info->flags, 0))
+		memory_total = mb_info->mem_upper + 1024;
+	pmm_init(memory_total);
 		
-	_i686_enable_interrupts();
+	if(!insert_uint_in_str(memory_total_message, 53 /*51 + 2 newlines*/, memory_total/1024))
+		print_string_vga(memory_total_message);
 	
 	if(CHECK_FLAGS_BIT(mb_info->flags, 6))
 		get_and_display_mmap(mb_info);
+	
+	_i686_enable_interrupts();	
 	
 	kernel_infinite_loop();
 }

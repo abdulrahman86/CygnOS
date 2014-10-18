@@ -33,7 +33,7 @@ void *memset(void *__dest, unsigned char __val, size_t __num_bytes)
 	return __dest;
 }
 
-int insert_uint_in_str(char *__str, size_t __num_last_pos, unsigned int __num)
+int insert_uint_in_str(char *__str, size_t __num_last_pos, uint64_t __num)
 {
 	if(__str == NULL || strlen(__str) <= __num_last_pos)
 		return -1;

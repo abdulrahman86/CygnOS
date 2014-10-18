@@ -71,12 +71,13 @@ i686-elf-gcc 	-c 	 kernel.c 								-o ${KRNL_OUT_PATH}/kernel.o		   	-std=gnu99
 i686-elf-gcc	-c	 gdt.c									-o ${KRNL_OUT_PATH}/gdt.o					-std=gnu99	   -ffreestanding -Wall		-Wextra	-I${SRC_HOME}/include
 i686-elf-gcc	-c	 idt.c									-o ${KRNL_OUT_PATH}/idt.o					-std=gnu99	   -ffreestanding -Wall		-Wextra	-I${SRC_HOME}/include
 i686-elf-gcc	-c	 pit.c									-o ${KRNL_OUT_PATH}/pit.o					-std=gnu99	   -ffreestanding -Wall		-Wextra	-I${SRC_HOME}/include
+i686-elf-gcc 	-c 	 pmm.c	 								-o ${KRNL_OUT_PATH}/pmm.o			   	-std=gnu99     -ffreestanding -Wall 	-Wextra	-I${SRC_HOME}/include
 i686-elf-gcc	-c	 screen_vga.c							-o ${KRNL_OUT_PATH}/screen_vga.o					-std=gnu99	   -ffreestanding -Wall		-Wextra	-I${SRC_HOME}/include
 
 cd ${LIB_SRC_PATH}
 i686-elf-gcc	-c	 string.c								-o ${LIB_OUT_PATH}/string.o					-std=gnu99	   -ffreestanding -Wall		-Wextra	-I${SRC_HOME}/include
 
-i686-elf-gcc 	-T 	 ${KRNL_LD_SRC_PATH}/kernel.ld	 		-o ${BUILD_OUTPUT_HOME}/kernel.bin		 	-ffreestanding -O2 	      -nostdlib ${KRNL_ASM_OUT_PATH}/kernel_s.o ${KRNL_ASM_OUT_PATH}/isr_s.o	${KRNL_OUT_PATH}/kernel.o	${KRNL_OUT_PATH}/screen_vga.o	${KRNL_OUT_PATH}/idt.o	${KRNL_OUT_PATH}/gdt.o	${KRNL_OUT_PATH}/pit.o	${LIB_OUT_PATH}/string.o	-lgcc
+i686-elf-gcc 	-T 	 ${KRNL_LD_SRC_PATH}/kernel.ld	 		-o ${BUILD_OUTPUT_HOME}/kernel.bin		 	-ffreestanding -O2 	      -nostdlib ${KRNL_ASM_OUT_PATH}/kernel_s.o ${KRNL_ASM_OUT_PATH}/isr_s.o	${KRNL_OUT_PATH}/kernel.o	${KRNL_OUT_PATH}/screen_vga.o	${KRNL_OUT_PATH}/pmm.o	${KRNL_OUT_PATH}/idt.o	${KRNL_OUT_PATH}/gdt.o	${KRNL_OUT_PATH}/pit.o	${LIB_OUT_PATH}/string.o	-lgcc
 
 
 cd ${IMAGES_HOME}
