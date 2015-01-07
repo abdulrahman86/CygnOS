@@ -111,13 +111,22 @@ static void get_and_display_mmap(multiboot_info_t *mb_info)
 	uint32_t mmap_addr = mb_info->mmap_addr;
 	uint32_t mmap_length = mb_info->mmap_length;
 	char *total_regions_usable_message = "\n                           Total region(s) usable                               ";
-	
+
 	multiboot_memory_map_t cur_map;	
 	uint32_t mmap_addr_buf = mmap_addr, regions_usable = 0;
+	
+	int next_page_initialized = 0;
 
-	while(mmap_addr_buf != (mmap_addr + mmap_length))
+	while(mmap_addr_buf < (mmap_addr + mmap_length))
 	{
 		cur_map = *((multiboot_memory_map_t *)mmap_addr_buf);
+		
+		if(!next_page_initialized)
+		{
+			next_page = cur_map.addr%PAGE_SIZE?((cur_map.addr/PAGE_SIZE)*PAGE_SIZE + PAGE_SIZE):cur_map.addr;
+			next_page_initialized = 1;
+		}
+		
 		pmm_region_init(cur_map.addr, cur_map.len);
 		if(cur_map.type == 1)
 			regions_usable++;
