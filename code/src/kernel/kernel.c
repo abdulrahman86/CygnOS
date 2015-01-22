@@ -127,9 +127,11 @@ static void get_and_display_mmap(multiboot_info_t *mb_info)
 			next_page_initialized = 1;
 		}
 		
-		pmm_region_init(cur_map.addr, cur_map.len);
 		if(cur_map.type == 1)
+		{
+			pmm_region_init(cur_map.addr, cur_map.len);
 			regions_usable++;
+		}
 	
 		mmap_addr_buf += cur_map.size + sizeof(cur_map.size);
 	}

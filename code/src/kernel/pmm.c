@@ -1,4 +1,5 @@
 #include <pmm.h>
+#include <screen_vga.h>
 
 //represents the total number of pages available in physical memory
 static uint64_t pages_total = 0;
@@ -13,6 +14,8 @@ uint64_t next_page = 0;
 
 static int prev_page_initialized = 0;
 
+extern uint32_t _START, _END;
+
 void pmm_init(uint64_t __memory_total)
 {
 	memory_total = __memory_total;
@@ -21,7 +24,7 @@ void pmm_init(uint64_t __memory_total)
 
 void pmm_region_init(uint64_t __base, uint64_t __length)
 {
-	int page_index;
+	uint64_t page_index;
 
 	if(__base%PAGE_SIZE != 0)
 		__base = (__base/PAGE_SIZE)*PAGE_SIZE + PAGE_SIZE;
@@ -31,12 +34,15 @@ void pmm_region_init(uint64_t __base, uint64_t __length)
 		
 	for(page_index = __base; page_index < (__base + __length); page_index += PAGE_SIZE)
 	{
-		if(prev_page_initialized)
-			*(uint64_t *)prev_page = page_index;
-			
-		prev_page = page_index;
-		if(!prev_page_initialized)
-			prev_page_initialized = 1;
+		if(page_index < *(uint64_t *)&_START || page_index >= *(uint64_t *)&_END)
+		{
+			if(prev_page_initialized)
+				*(uint64_t *)prev_page = page_index;
+				
+			prev_page = page_index;
+			if(!prev_page_initialized)
+				prev_page_initialized = 1;
+		}
 	}
 }
 		
