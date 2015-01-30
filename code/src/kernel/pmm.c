@@ -60,6 +60,7 @@ void pmm_region_init(uint32_t __base, uint32_t __length)
 		if(kernel_in_region && page_index >= kstart_addr && page_index < kend_addr)
 			continue;
 		
+		*(uint32_t *)page_index = 0;
 		if(prev_page_initialized)
 			*(uint32_t *)prev_page = page_index;
 				
@@ -67,6 +68,21 @@ void pmm_region_init(uint32_t __base, uint32_t __length)
 		if(!prev_page_initialized)
 			prev_page_initialized = 1;
 	}
+}
+
+uint32_t pmm_alloc()
+{
+	uint32_t next_page_buf;
+	
+	if(next_page)
+	{
+		next_page_buf = next_page;
+		next_page = *(uint32_t *)next_page_buf;
+		
+		return next_page_buf;
+	}
+	else
+		return 0;
 }
 		
 
