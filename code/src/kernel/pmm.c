@@ -8,12 +8,14 @@ static uint64_t pages_total = 0;
 //represents the total amount of physical memory in KB
 static uint64_t memory_total = 0;
 
-//holds the address of the previous page that was marked free, so that the address of the next page can be written to it when iterating over the pages
-static uint32_t prev_page = 0;
+uint16_t total_regions = 0;
+multiboot_memory_map_t mmap[32];
 
-uint32_t next_page = 0;
+uint32_t last_page = 0, next_page = 0;
 
-static int prev_page_initialized = 0;
+//indicates if last_page has been initialized and set to a valid page number yet
+//used during initializing a memory region. last_page must be initialized only once when iterating through all regions
+static int last_page_initialized = 0;
 
 extern uint32_t _START, _END;
 static uint32_t kstart_addr, kend_addr;
@@ -61,12 +63,12 @@ void pmm_region_init(uint32_t __base, uint32_t __length)
 			continue;
 		
 		*(uint32_t *)page_index = 0;
-		if(prev_page_initialized)
-			*(uint32_t *)prev_page = page_index;
+		if(last_page_initialized)
+			*(uint32_t *)last_page = page_index;
 				
-		prev_page = page_index;
-		if(!prev_page_initialized)
-			prev_page_initialized = 1;
+		last_page = page_index;
+		if(!last_page_initialized)
+			last_page_initialized = 1;
 	}
 }
 
@@ -76,6 +78,9 @@ uint32_t pmm_alloc()
 	
 	if(next_page)
 	{
+		if(next_page == last_page)
+			last_page = 0;
+		
 		next_page_buf = next_page;
 		next_page = *(uint32_t *)next_page_buf;
 		
@@ -83,6 +88,33 @@ uint32_t pmm_alloc()
 	}
 	else
 		return 0;
+}
+
+int pmm_dealloc(uint32_t __page_num)
+{
+	int mmap_loop_index;
+	
+	for(mmap_loop_index = 0; mmap_loop_index < total_regions; mmap_loop_index++)
+	{
+		multiboot_memory_map_t cur_map = mmap[mmap_loop_index];
+		if(cur_map.type != MULTIBOOT_MEMORY_AVAILABLE && __page_num >= cur_map.addr && __page_num < (cur_map.addr + cur_map.len))
+			return -1;
+	}
+	
+	*(uint32_t *)__page_num = 0;
+	
+	if(!last_page)
+	{
+		last_page = __page_num;
+		next_page = __page_num;
+	}
+	else
+	{
+		*(uint32_t *)last_page = __page_num;
+		last_page = __page_num;
+	}
+	
+	return 0;
 }
 		
 

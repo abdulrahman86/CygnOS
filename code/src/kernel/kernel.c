@@ -106,20 +106,46 @@ static timespec get_rtc_time()
 	return rtc_time;
 }
 
-static void get_and_display_mmap(multiboot_info_t *mb_info)
+static void store_mmap(uint32_t __mmap_addr, uint32_t __mmap_length)
+{
+	uint32_t addr_buf = __mmap_addr;
+	multiboot_memory_map_t cur_map;
+	int i = 0;
+	
+	while(addr_buf < (__mmap_addr + __mmap_length))
+	{
+		cur_map = *(multiboot_memory_map_t *)addr_buf;
+		
+		mmap[i].addr = cur_map.addr;
+		mmap[i].len = cur_map.len;
+		mmap[i].type = cur_map.type;
+		mmap[i].size = cur_map.size;
+		
+		i++;
+		
+		addr_buf += cur_map.size + sizeof(cur_map.size);
+	}
+	
+	total_regions = i;
+}
+
+static void init_mmap_and_memory(multiboot_info_t *mb_info)
 {
 	uint32_t mmap_addr = mb_info->mmap_addr;
 	uint32_t mmap_length = mb_info->mmap_length;
 	char *total_regions_usable_message = "\n                           Total region(s) usable                               ";
-
-	multiboot_memory_map_t cur_map;	
-	uint32_t mmap_addr_buf = mmap_addr, regions_usable = 0;
 	
-	int next_page_initialized = 0;
+	memset((void *)mmap, 0, 32*sizeof(multiboot_memory_map_t));
+	store_mmap(mmap_addr, mmap_length);
+	
+	multiboot_memory_map_t cur_map;	
+	uint16_t regions_usable = 0;
+	
+	int next_page_initialized = 0, mmap_loop_index = 0;
 
-	while(mmap_addr_buf < (mmap_addr + mmap_length))
+	while(mmap_loop_index < total_regions)
 	{
-		cur_map = *((multiboot_memory_map_t *)mmap_addr_buf);
+		cur_map = mmap[mmap_loop_index++];
 		
 		if(!next_page_initialized)
 		{
@@ -127,13 +153,11 @@ static void get_and_display_mmap(multiboot_info_t *mb_info)
 			next_page_initialized = 1;
 		}
 		
-		if(cur_map.type == 1)
+		if(cur_map.type == MULTIBOOT_MEMORY_AVAILABLE)
 		{
 			pmm_region_init(cur_map.addr, cur_map.len);
 			regions_usable++;
 		}
-	
-		mmap_addr_buf += cur_map.size + sizeof(cur_map.size);
 	}
 	
 	if(!insert_uint_in_str(total_regions_usable_message, 53 /**52 + 1 for the newlines*/, regions_usable))
@@ -199,7 +223,7 @@ void main(multiboot_info_t *mb_info)
 		print_string_vga(memory_total_message);
 	
 	if(CHECK_FLAGS_BIT(mb_info->flags, 6))
-		get_and_display_mmap(mb_info);
+		init_mmap_and_memory(mb_info);
 	
 	_i686_enable_interrupts();	
 	
