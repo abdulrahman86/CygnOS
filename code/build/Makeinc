@@ -1,0 +1,17 @@
+IMAGES_HOME = $(OS_HOME)/images/
+BUILD_DIR = build/
+BUILD_HOME = $(IMAGES_HOME)$(BUILD_DIR)
+
+SRC_HOME = $(OS_HOME)/code/src/
+
+INCLUDES_DIR = include
+INCLUDES_PATH = $(SRC_HOME)$(INCLUDES_DIR)
+
+AS = nasm
+ASFLAGS = -felf
+
+CC = i686-elf-gcc
+CF_INCLUDE = -I$(INCLUDES_PATH)
+CF_CSTD = -std=gnu99
+CF_OTHERS = -Wall -Wextra -ffreestanding
+CFLAGS = $(CF_INCLUDE) $(CF_CSTD) $(CF_OTHERS)
