@@ -1,68 +1,38 @@
-IMAGES_HOME = $(CURDIR)/../../images/
-BUILD_OUTPUT_DIR = build/
-BUILD_OUTPUT_HOME = $(IMAGES_HOME)$(BUILD_OUTPUT_DIR)
+include Makeinc
 
+BOOT_DIR = boot/
 
-SRC_HOME = $(CURDIR)/../src/
+KRNL_HOME = $(SRC_HOME)kernel
+LIB_HOME = $(SRC_HOME)lib
 
-INCLUDES_DIR = include
-INCLUDES_DIR_PATH = $(SRC_HOME)$(INCLUDES_DIR)
+OBJS = $(shell find $(BUILD_HOME) -type f -name *.o)
 
-KRNL_SRC_DIR = kernel/
-KRNL_SRC_PATH = $(SRC_HOME)$(KRNL_SRC_DIR)
-KRNL_SRC_FILES = $(wildcard $(KRNL_SRC_PATH)*.c)
+LD_DIR = linker/
+LD_SCRIPT = kernel.ld
+LD_FILE = $(SRC_HOME)$(LD_DIR)$(LD_SCRIPT)
 
-KRNL_SRC_ASM_DIR = asm/
-KRNL_SRC_ASM_PATH = $(KRNL_SRC_PATH)$(KRNL_SRC_ASM_DIR)
+GRUB_MK_RESCUE = grub-mkrescue
+GRUB_IMAGES_DIR = /usr/lib/grub/i386-pc/
 
-LIB_SRC_DIR = lib/
-LIB_SRC_PATH = $(SRC_HOME)$(LIB_SRC_DIR)
-LIB_SRC_FILES = $(wildcard $(LIB_SRC_PATH)*.c)
+KRNL_BINARY = kernel.bin
+ISODIR = $(IMAGES_HOME)isodir/
+OS_ISO = cygnusos.iso
 
-
-AS = nasm
-ASFLAGS = -felf
-
-
-CC = i686-elf-gcc
-CF_INCLUDE = -I$(INCLUDES_DIR_PATH)
-CF_CSTD = -std=gnu99
-CF_OTHERS = -Wall -Wextra -ffreestanding
-CFLAGS = $(CF_INCLUDE) $(CF_CSTD) $(CF_OTHERS)
-
-
-KRNL_OUT_PATH = $(BUILD_OUTPUT_HOME)$(KRNL_SRC_DIR)
-#KRNL_OBJ_RELDIR_FILES = ${KRNL_SRC_FILES:.c=.o}
-KRNL_OBJ_FILES = $(pathsubst $(KRNL_SRC_PATH)%.c, $(KRNL_OUT_PATH)%.o, $(KRNL_SRC_FILES))
-
-KRNL_ASM_OUT_PATH = $(KRNL_OUT_PATH)$(KRNL_SRC_ASM_DIR)
-
-LIB_OUT_PATH = $(BUILD_OUTPUT_HOME)$(LIB_SRC_DIR)
-LIB_OBJ_FILES = ${LIB_SRC_FILES:.c=.o}
-
-
-OS_ISO_NAME = cygnusos.iso
-
-
-all: compile buildimage
+all: compile buildbinary buildimage
  
-compile: dirs ascode ccode
-
-dirs:
-	mkdir -p $(KRNL_ASM_OUT_PATH)
-	mkdir -p $(LIB_OUT_PATH)
-
-ascode:
-	$(AS) $(ASFLAGS) $(KRNL_SRC_ASM_PATH)kernel.asm -o $(KRNL_ASM_OUT_PATH)kernel_s.o
-	$(AS) $(ASFLAGS) $(KRNL_SRC_ASM_PATH)isr.asm -o $(KRNL_ASM_OUT_PATH)isr_s.o
+compile:
+	$(MAKE) -C $(KRNL_HOME)
+	$(MAKE) -C $(LIB_HOME)
 	
-ccode: kernel lib
-
-kernel: $(KRNL_OBJ_FILES)
-
-lib: 
+buildbinary:
+	$(CC) -T $(LD_FILE) -o $(BUILD_HOME)$(KRNL_BINARY) $(LD_OTHERS) $(OBJS) $(LD_LIBS)
 
 buildimage:
+	mkdir -p $(ISODIR)boot/grub
+	cp $(BUILD_HOME)$(KRNL_BINARY) $(ISODIR)boot/cygnusos.bin
+	cp $(SRC_HOME)$(BOOT_DIR)grub.cfg $(ISODIR)boot/grub/grub.cfg
+	$(GRUB_MK_RESCUE) -d $(GRUB_IMAGES_DIR) -o $(IMAGES_HOME)$(OS_ISO) $(ISODIR)
+	rm -rf $(ISODIR)
 
 clean:
 	rm -rf $(IMAGES_HOME)

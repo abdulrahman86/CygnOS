@@ -15,3 +15,8 @@ CF_INCLUDE = -I$(INCLUDES_PATH)
 CF_CSTD = -std=gnu99
 CF_OTHERS = -Wall -Wextra -ffreestanding
 CFLAGS = $(CF_INCLUDE) $(CF_CSTD) $(CF_OTHERS)
+
+LD_LIBS = -lgcc
+LD_OTHERS = -nostdlib -O2 -ffreestanding
+
+MAKE = make
