@@ -4,22 +4,23 @@ KRNL_DIR = $(shell basename $(CURDIR))
 ASM_DIR = asm/
 
 KRNL_SRCS = $(wildcard *.c)
+ASM_SRCS = $(wildcard $(ASM_DIR)*.asm)
 
-KRNL_OBJS = $(KRNL_SRCS:.c=.o)
 KRNL_OBJ_PATH = $(BUILD_HOME)$(KRNL_DIR)/
+KRNL_OBJS = $(patsubst %.c, $(KRNL_OBJ_PATH)%.o, $(KRNL_SRCS))
 ASM_OBJ_PATH = $(KRNL_OBJ_PATH)$(ASM_DIR)
+ASM_OBJS = $(patsubst $(ASM_DIR)%.asm, $(ASM_OBJ_PATH)%_s.o, $(ASM_SRCS))
 
-all: dirs assembly kernel
+all: dirs $(ASM_OBJS) $(KRNL_OBJS)
 
 dirs:
-	mkdir -p $(ASM_OBJ_PATH)
+	@mkdir -p $(ASM_OBJ_PATH)
 
-assembly:
-	$(AS) $(ASFLAGS) $(ASM_DIR)kernel.asm -o $(ASM_OBJ_PATH)kernel_s.o
-	$(AS) $(ASFLAGS) $(ASM_DIR)isr.asm -o $(ASM_OBJ_PATH)isr_s.o
+$(ASM_OBJS): $(ASM_OBJ_PATH)%_s.o: $(ASM_DIR)%.asm
+	$(AS) $(ASFLAGS) $< -o $@
 
-kernel: $(KRNL_OBJS)
-	mv *.o $(KRNL_OBJ_PATH)
+$(KRNL_OBJS): $(KRNL_OBJ_PATH)%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
 	rm -rf $(KRNL_OBJ_PATH)
