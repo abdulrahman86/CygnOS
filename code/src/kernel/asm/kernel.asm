@@ -107,3 +107,11 @@ GLOBAL		_i686_disable_interrupts
 _i686_disable_interrupts:
 	cli
 	ret
+
+GLOBAL		_i686_enable_paging
+
+_i686_enable_paging:
+	mov	eax,	cr0
+	or	eax,	0x80000000
+	mov	cr0,	eax
+	ret
