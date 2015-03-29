@@ -12,7 +12,6 @@
 #define PGTAB_CACHEWRITEPOLICY   0x00000008
 #define PGTAB_CAN_CACHE          0x00000010
 #define PGTAB_ACCESSED           0x00000020
-#define PGTAB_DIRTY              0x00000040
 #define PGTAB_LARGE              0x00000080
 #define PGTAB_GLOBAL             0x00000100
 #define PGTAB_TABLE_ADDRESS      0xFFFFF000
