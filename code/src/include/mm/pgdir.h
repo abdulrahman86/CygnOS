@@ -13,15 +13,14 @@
 #define PGTAB_CAN_CACHE          0x00000010
 #define PGTAB_ACCESSED           0x00000020
 #define PGTAB_LARGE              0x00000080
-#define PGTAB_GLOBAL             0x00000100
 #define PGTAB_TABLE_ADDRESS      0xFFFFF000
 
 //type representing a page directory entry. just a typedef for an unsigned long
-typedef unsigned long pdentry;
+typedef uint32_t pdentry;
 
 typedef struct
 {
-	pdentry pgdir_entries[PAGE_DIR_ENTRIES];
+	pdentry pgdir_entries[PAGE_DIR_ENTRIES] __attribute__((aligned(4096)));
 } pgdir;
 
 #endif

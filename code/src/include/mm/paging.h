@@ -19,4 +19,6 @@ extern int set_pgd_entry(pgdir *__pgdir, unsigned int __pgd_index, pdentry __ent
 //routine which sets up paging for use during kernel start-up. this set-up will be destroyed once the initial working environment has been set up properly
 extern void paging_startup();
 
+extern pgdir main_pg_dir;
+
 #endif

@@ -9,6 +9,7 @@
 #include <string.h>
 #include <multiboot.h>
 #include <screen_vga.h>
+#include <mm/paging.h>
 
 #define	ISLEAP(year)	(((year%4 == 0 && year%100 != 0) || (year%400 == 0))?1:0)
 #define	CHECK_FLAGS_BIT(flags, bitnum)	(flags && (1<<bitnum))
@@ -226,6 +227,9 @@ void main(multiboot_info_t *mb_info)
 		init_mmap_and_memory(mb_info);
 	
 	_i686_enable_interrupts();	
+	
+	paging_startup();
+	_i686_enable_paging();
 	
 	kernel_infinite_loop();
 }

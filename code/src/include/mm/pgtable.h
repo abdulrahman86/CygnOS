@@ -17,11 +17,11 @@
 #define	PAGE_ADDRESS			0xFFFFF000
 
 //type representing a page table entry. just a typedef for an unsigned long
-typedef unsigned long ptentry;
+typedef uint32_t ptentry;
 
 typedef struct
 {
-	ptentry pgtable_entries[PAGE_TABLE_ENTRIES];
+	ptentry pgtable_entries[PAGE_TABLE_ENTRIES] __attribute__((aligned(4096)));
 } pgtable;
 
 #endif
