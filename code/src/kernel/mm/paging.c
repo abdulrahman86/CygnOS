@@ -1,8 +1,16 @@
 #include <pmm.h>
+#include <string.h>
 #include <mm/paging.h>
 
-pgdir main_pg_dir;
-pgtable main_pg_table;
+__inline pgdir *get_cur_pgdir()
+{
+	uint32_t cr3_val;
+	
+	__asm__ __volatile__ ("movl %%cr3, %%eax"
+						  :"=a"(cr3_val));
+
+	return (pgdir *)cr3_val;
+}
 
 int switch_pg_dir(pgdir *__page_directory)
 {
@@ -36,7 +44,7 @@ __inline int set_pgd_entry(pgdir *__pgdir, unsigned int __pgd_index, pdentry __e
 	return 0;
 }
 
-__inline ptentry *get_ptentry_from_vaddr(pgtable *__pgtable, virtaddr __addr)
+ptentry *get_ptentry_from_vaddr(pgtable *__pgtable, virtaddr __addr)
 {
 	if(__pgtable)
 	{
@@ -51,7 +59,7 @@ __inline ptentry *get_ptentry_from_vaddr(pgtable *__pgtable, virtaddr __addr)
 	return 0;
 }
 
-__inline pdentry *get_pdentry_from_vaddr(pgdir *__pgdir, virtaddr __addr)
+pdentry *get_pdentry_from_vaddr(pgdir *__pgdir, virtaddr __addr)
 {
 	if(__pgdir)
 	{
@@ -69,16 +77,20 @@ __inline pdentry *get_pdentry_from_vaddr(pgdir *__pgdir, virtaddr __addr)
 void paging_startup()
 {
 	unsigned int idx;
+	
+	pgdir *startup_pgdir = (pgdir *)pmm_alloc();
 
 	for(idx = 0;idx < PAGE_DIR_ENTRIES; idx++)
-		set_pgd_entry(&main_pg_dir, idx, 0x2);
+		set_pgd_entry(startup_pgdir, idx, 0x2);
+		
+	pgtable *startup_pgtable = (pgtable *)pmm_alloc();
 	
 	for(idx = 0;idx < PAGE_TABLE_ENTRIES; idx++)
-		set_pt_entry(&main_pg_table, idx, (ptentry)(idx*0x1000 | PAGE_PRESENT | PAGE_RW));
+		set_pt_entry(startup_pgtable, idx, (ptentry)(idx*0x1000 | PAGE_PRESENT | PAGE_RW));
 	
-	set_pgd_entry(&main_pg_dir, 0, (pdentry)(((uint32_t)&main_pg_table) | PAGE_PRESENT | PAGE_RW));
+	set_pgd_entry(startup_pgdir, 0, (pdentry)(((uint32_t)startup_pgtable) | PAGE_PRESENT | PAGE_RW));
 	
-	switch_pg_dir(&main_pg_dir);
+	switch_pg_dir(startup_pgdir);
 }
 
 int alloc_page(ptentry *__entry)
@@ -102,4 +114,28 @@ int dealloc_page(ptentry *__entry)
 	*__entry &= !PAGE_PRESENT;
 	
 	return dealloc_ret;
+}
+
+int map_phys_to_virt(uint32_t __paddr, virtaddr __vaddr)
+{
+	pgdir *cur_pgdir = get_cur_pgdir();
+	
+	pdentry pgdir_entry = (*cur_pgdir).pgdir_entries[__PAGE_DIRECTORY_INDEX(__vaddr)];
+	if((pgdir_entry & PGTAB_PRESENT) != PGTAB_PRESENT)
+	{
+		pgtable *new_pgtable = (pgtable *)pmm_alloc();
+		
+		if(new_pgtable == 0)
+			return -1;
+			
+		memset((void *)new_pgtable, 0, sizeof(pgtable));
+		
+		pgdir_entry = (pdentry)(((uint32_t)new_pgtable) | PAGE_PRESENT | PAGE_RW);
+		set_pgd_entry(cur_pgdir, __PAGE_DIRECTORY_INDEX(__vaddr), pgdir_entry);
+	}
+	
+	ptentry page_ptentry = (ptentry)((__paddr & PAGE_ADDRESS) | PAGE_PRESENT | PAGE_RW);
+	set_pt_entry((pgtable *)(pgdir_entry & PGTAB_TABLE_ADDRESS), __PAGE_TABLE_INDEX(__vaddr), page_ptentry);
+	
+	return 0;
 }

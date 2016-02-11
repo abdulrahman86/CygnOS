@@ -26,5 +26,6 @@ typedef struct
 
 //TODO: the bit masks should be defined in a common location in another header
 #define	__PAGE_TABLE_INDEX(vaddr)	((vaddr >> 12) & 0x3FF)
+#define __PAGE_FRAME_INDEX(vaddr)	(vaddr & 0xFFF)
 
 #endif

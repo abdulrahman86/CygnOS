@@ -26,4 +26,7 @@ typedef struct
 //TODO: the bit masks should be defined in a common location in another header
 #define	__PAGE_DIRECTORY_INDEX(vaddr)	((vaddr >> 22) & 0x3FF)
 
+//gets the address of the currently used page directory (which is the value of CR3)
+pgdir *get_cur_pgdir();
+
 #endif

@@ -19,9 +19,6 @@ extern int set_pgd_entry(pgdir *__pgdir, unsigned int __pgd_index, pdentry __ent
 //routine which sets up paging for use during kernel start-up. this set-up will be destroyed once the initial working environment has been set up properly
 extern void paging_startup();
 
-//the (for now) single page directory used throughout the system
-extern pgdir main_pg_dir;
-
 //typedef for a virtual address
 typedef uint32_t virtaddr;
 
@@ -38,5 +35,8 @@ extern ptentry *get_ptentry_from_vaddr(pgtable *__pgtable, virtaddr __addr);
 
 //returns address of the page directory entry corresponding to the given virtual address in the given page directory
 extern pdentry *get_pdentry_from_vaddr(pgdir *__pgdir, virtaddr __addr);
+
+//maps a given physical address to the given virtual address, creating a new page table if necessary
+extern int map_phys_to_virt(uint32_t __paddr, virtaddr __vaddr);
 
 #endif
