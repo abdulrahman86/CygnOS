@@ -7,6 +7,7 @@
 #include <time.h>
 #include <pmm.h>
 #include <string.h>
+#include <keyboard.h>
 #include <multiboot.h>
 #include <screen_vga.h>
 #include <mm/paging.h>
@@ -230,6 +231,8 @@ void main(multiboot_info_t *mb_info)
 	
 	paging_startup();
 	_i686_enable_paging();
+
+	if(!kb_self_test());
 	
 	kernel_infinite_loop();
 }
