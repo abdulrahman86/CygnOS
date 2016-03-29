@@ -35,5 +35,12 @@ int kb_init()
 	if(kb_get_data() != KB_RESP_RESET_SUCCESS)
 		return -1;
 	
+	//enable interrupts on first port
+	kb_ctrlr_send_cmd(KB_CMD_CONFIG_READ);
+	config_byte = kb_get_data();
+	config_byte |= 0x1;
+	kb_ctrlr_send_cmd(KB_CMD_CONFIG_WRITE);
+	kb_send_data(config_byte);
+	
 	return 0;
 }

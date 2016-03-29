@@ -37,7 +37,7 @@ static void pic_remap()
 	outb(PORT_PIC2_DATA, ICW4_X86);	
 	
 	//enable only IRQ0
-	outb(PORT_PIC1_DATA, 0xFE);
+	outb(PORT_PIC1_DATA, 0xFC);
 }
 
 static timespec get_rtc_time()
