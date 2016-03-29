@@ -197,6 +197,7 @@ void main(multiboot_info_t *mb_info)
 	char *starred_heading = "\n\n                    ****************************************                    ";
 	char *welcome_message = "\n\n                              Welcome to Cygnus OS                              ";
 	char *memory_total_message = "\n\n                          Total system memory:      MB                          ";
+	char *kb_error = "\n\n                                Keyboard error!!                                ";
 
 	uint64_t memory_total = 0;
 
@@ -232,7 +233,8 @@ void main(multiboot_info_t *mb_info)
 	paging_startup();
 	_i686_enable_paging();
 
-	if(!kb_self_test());
+	if(kb_init())
+		print_string_vga(kb_error);
 	
 	kernel_infinite_loop();
 }
