@@ -5,10 +5,10 @@ A hobby x86 OS created from scratch.
 
 Brief explanation of the directories:
 
-**archive/floppy:** The first implementation of the OS was for booting off a floppy image. I wrote the entire floppy bootloader from scratch -- this folder contains this bootloader and some other files relevant to this boot scenario all contained in the _boot_ subdirectory. This is no longer used since I've moved to using grub.
+- **archive/floppy:** The first implementation of the OS was for booting off a floppy image. I wrote the entire floppy bootloader from scratch -- this folder contains this bootloader and some other files relevant to this boot scenario all contained in the _boot_ subdirectory. This is no longer used since I've moved to using grub.
 
-**code:** The actual code of the OS. The file and sub-directory names here should be self-explanatory.
+- **code:** The actual code of the OS. The file and sub-directory names here should be self-explanatory.
 
-**cross-compiler:** The cross-compiler toolchain required to run this OS. The toolchain is built for an x86-64 build host and should work as-is.
+- **cross-compiler:** The cross-compiler toolchain required to run this OS. The toolchain is built for an x86-64 build host and should work as-is.
 
-**docs:** Some miscellaneous notes.
+- **docs:** Some miscellaneous notes.
